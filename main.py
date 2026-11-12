@@ -967,7 +967,8 @@ INTERACOES_JS = r"""
 <script>
 (() => {
   'use strict';
-  const root = document.getElementById('ss-directory');
+  const roots = document.querySelectorAll('#ss-directory');
+  const root = roots.length ? roots[roots.length - 1] : null;
   if (!root || root.dataset.initialized === '1') return;
   root.dataset.initialized = '1';
   const keys = {fav:'ss-veiculos:favs:v2',recent:'ss-veiculos:recent:v2',only:'ss-veiculos:only-favs:v2'};
