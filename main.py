@@ -69,7 +69,7 @@ html, body, [data-testid="stAppViewContainer"] {background:#f8fafa;}
 .ss-card-icon svg {width:20px;height:20px;stroke:currentColor;}
 .ss-pill {font-size:.70rem;font-weight:700;padding:5px 9px;border-radius:999px;background:#f0f6f5;color:#33696a;white-space:nowrap;}
 .ss-card-title {font-size:1.005rem;line-height:1.37;font-weight:750;color:#1d3e43;margin:0 0 9px;overflow-wrap:anywhere;}
-.ss-card-city {font-size:.82rem;color:#738285;margin-bottom:18px;}
+.ss-card-city {font-size:.82rem;color:#536669;margin-bottom:18px;}
 .ss-card-city strong {font-weight:620;color:#536669;}
 .ss-card-spacer {flex:1;}
 .ss-cta,.ss-no-link {width:100%;min-height:40px;border-radius:10px;display:inline-flex;justify-content:center;align-items:center;gap:8px;font-size:.88rem;font-weight:750;text-decoration:none!important;box-sizing:border-box;}
@@ -77,9 +77,9 @@ html, body, [data-testid="stAppViewContainer"] {background:#f8fafa;}
 .ss-cta:hover {background:#005253;color:#fff!important;}
 .ss-cta:focus-visible {outline:3px solid #3da8ab;outline-offset:3px;}
 .ss-cta svg {width:16px;height:16px;stroke:currentColor;}
-.ss-no-link {color:#708185;border:1px dashed #d0dede;background:#f6f9f9;}
+.ss-no-link {color:#536669;border:1px dashed #d0dede;background:#f6f9f9;}
 .ss-notice {border:1px solid #e1eceb;border-radius:12px;background:white;padding:20px;color:#587477;text-align:center;margin:14px 0;}
-.ss-footer {margin-top:28px;border-top:1px solid #dceae9;padding-top:18px;color:#6b8183;font-size:.81rem;text-align:center;}
+.ss-footer {margin-top:28px;border-top:1px solid #dceae9;padding-top:18px;color:#536669;font-size:.81rem;text-align:center;}
 /* Os controles de pesquisa e categoria continuam nativos e acessíveis. */
 div[data-testid="stTextInput"] input {border-radius:11px;background:#fff;border-color:#dae8e7;min-height:47px;}
 div[data-testid="stTextInput"] input:focus {border-color:#007f86;box-shadow:0 0 0 1px #007f86;}
