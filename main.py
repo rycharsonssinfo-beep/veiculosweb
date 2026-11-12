@@ -19,7 +19,7 @@ from urllib.parse import urlparse
 import streamlit as st
 
 st.set_page_config(
-    page_title="Painel de Acessos | Veículos - Grupo S&S",
+    page_title="Painel de Acessos | Sistema de Veículos",
     page_icon="🚗",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -101,6 +101,36 @@ div[data-testid="stTextInput"] input:focus {border-color:#007f86;box-shadow:0 0 
     .ss-title {font-size:1.92rem;}
     .ss-kpi-label {font-size:.73rem;}
 }
+
+/* Modo escuro do sistema: os componentes personalizados acompanham o Streamlit. */
+@media (prefers-color-scheme: dark) {
+  :root { --ss-ink:#e9f3f3; --ss-muted:#aec4c6; --ss-line:#375154; }
+  html, body, [data-testid="stAppViewContainer"] {background:#101e21!important;color:#eaf3f3;}
+  [data-testid="stHeader"] {background:rgba(16,30,33,.96)!important;}
+  .ss-kicker {color:#7bd5d2;}
+  .ss-title,.ss-section-title {color:#eaf7f6;}
+  .ss-subtitle {color:#bee0df;}
+  .ss-description,.ss-section-sub,.ss-search-caption {color:#acc5c7;}
+  .ss-divider {border-color:#355054;}
+  .ss-kpi,.ss-card {background:#1b3033;border-color:#385458;box-shadow:0 3px 13px rgba(0,0,0,.17);}
+  .ss-card:hover {border-color:#5a9696;box-shadow:0 9px 26px rgba(0,0,0,.24);}
+  .ss-kpi-label {color:#bbd2d3;}
+  .ss-kpi-count {color:#e8fcf9;}
+  .ss-icon,.ss-card-icon {background:#264548;color:#8fdbd4;}
+  .ss-card-title {color:#f0f8f8;}
+  .ss-card-city,.ss-card-city strong {color:#bad0d2;}
+  .ss-pill {background:#29484c;color:#cee9e8;}
+  .ss-cta {background:#006e72;color:#fff!important;border-color:#16868a;}
+  .ss-cta:hover {background:#00595d;}
+  .ss-no-link {background:#25383b;border-color:#4b666a;color:#b3c9ca;}
+  .ss-notice {background:#1c3033;border-color:#385458;color:#c9dede;}
+  .ss-footer {color:#acc4c6;border-color:#355054;}
+  div[data-testid="stTextInput"] input {background:#1b3033!important;color:#f1f9f9!important;border-color:#48686c!important;}
+  div[data-testid="stTextInput"] input::placeholder {color:#afc5c6!important;}
+  /* A marca contém texto verde escuro: a base clara mantém sua legibilidade. */
+  div[data-testid="stImage"] {background:#fff;padding:9px;border-radius:12px;box-sizing:border-box;}
+}
+
 @media (prefers-reduced-motion:reduce) {.ss-card,.ss-cta {transition:none!important;}}
 </style>
 """, unsafe_allow_html=True)
@@ -754,7 +784,6 @@ URLS_EM_CONFERENCIA = [
 ]
 
 CATEGORIAS = ["Prefeituras", "Câmaras", "Consórcios", "Institutos", "SAAEs"]
-ROTULOS = {"Todos os Acessos": "Todos os Acessos", "Prefeituras": "Prefeituras", "Câmaras": "Câmaras", "Consórcios": "Consórcios", "Institutos": "Institutos", "SAAEs": "SAAEs"}
 
 # Ícones vetoriais locais; não dependem de serviços ou CDNs externos.
 ICONES = {
@@ -802,7 +831,7 @@ def entidades_unicas(itens):
 
 
 def renderizar_indicadores(registros, totais):
-    itens = [("Todos os Acessos", "Total de Acessos", totais["Total de Acessos"])]
+    itens = [("Todos os Acessos", "Sistemas disponíveis", totais["Total de Acessos"])]
     itens.extend((cat, cat, totais[cat]) for cat in CATEGORIAS)
     partes = ['<section class="ss-kpis" aria-label="Indicadores do painel">']
     for cat, rotulo, quantidade in itens:
@@ -818,13 +847,13 @@ def renderizar_indicadores(registros, totais):
 
 def renderizar_cards(lista):
     """Cards responsivos com links originais; abrem em nova aba sem iframe."""
-    resultado = ['<section class="ss-grid" aria-label="Acessos municipais">']
+    resultado = ['<section class="ss-grid" aria-label="Entidades municipais">']
     seta = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>'
     for e in lista:
         nome, municipio, categoria = (escape(e[k], quote=True) for k in ("nome", "municipio", "categoria"))
         if url_valida(e["url"]):
             destino = escape(e["url"], quote=True)
-            acesso = f'<a class="ss-cta" href="{destino}" target="_blank" rel="noopener noreferrer" aria-label="Acessar sistema de {nome} (nova aba)">Acessar Sistema {seta}</a>'
+            acesso = f'<a class="ss-cta" href="{destino}" target="_blank" rel="noopener noreferrer" aria-label="Abrir sistema de {nome} (nova aba)">Abrir sistema {seta}</a>'
         else:
             acesso = '<span class="ss-no-link" aria-label="Link não cadastrado">Link não cadastrado</span>'
         resultado.append(
@@ -852,10 +881,10 @@ with marca:
 with titulo:
     st.markdown("""<div class="ss-header">
         <div class="ss-top-accent"></div>
-        <div class="ss-kicker">Central de acesso · Sistema de Veículos</div>
-        <div class="ss-title">Painel de Acessos</div>
-        <div class="ss-subtitle">Sistema de Veículos | Grupo S&S Informática</div>
-        <div class="ss-description">Central de acesso aos sistemas de gestão de veículos das entidades municipais.</div>
+        <div class="ss-kicker">Grupo S&S · Gestão Municipal</div>
+        <h1 class="ss-title">Painel de Acessos</h1>
+        <div class="ss-subtitle">Sistema de Veículos</div>
+        <div class="ss-description">Encontre e abra rapidamente o ambiente de cada entidade.</div>
     </div>""", unsafe_allow_html=True)
 st.markdown('<hr class="ss-divider"/>', unsafe_allow_html=True)
 
@@ -871,14 +900,25 @@ renderizar_indicadores(registros, contagem)
 # ==================================================
 # 7. PESQUISA E FILTROS POR CATEGORIA
 # ==================================================
-st.markdown('<div class="ss-section"><h2 class="ss-section-title">Localizar um acesso</h2><p class="ss-section-sub">Pesquise e filtre sem sair desta página</p></div>', unsafe_allow_html=True)
-pesquisa = st.text_input("Pesquisar município ou entidade", placeholder="Pesquisar município ou entidade...", key="busca")
+st.markdown('<div class="ss-section"><h2 class="ss-section-title">Localizar entidade</h2><p class="ss-section-sub">Busca por nome ou município</p></div>', unsafe_allow_html=True)
+pesquisa = st.text_input(
+    "Pesquisar por nome ou município",
+    placeholder="Ex.: Maranguape, Caucaia ou SAAE",
+    key="busca",
+    label_visibility="collapsed",
+    icon=":material/search:",
+    type="search",
+    live="250ms",  # Streamlit >= 1.64: atualiza após uma pausa ao digitar.
+)
 
+# Os filtros contam entidades cadastradas, inclusive as que ainda aguardam URL.
+# Os indicadores acima, por outro lado, contam apenas sistemas com URL confirmada.
+contagem_entidades = Counter(e["categoria"] for e in registros)
 escolhas = ["Todos os Acessos"] + CATEGORIAS
 categoria = st.pills(
     "Filtrar por categoria", escolhas, default="Todos os Acessos", required=True,
     key="categoria_atual", label_visibility="collapsed", wrap=True,
-    format_func=lambda c: f"{c} · {contagem['Total de Acessos'] if c == 'Todos os Acessos' else contagem[c]}",
+    format_func=lambda c: f"{'Todos' if c == 'Todos os Acessos' else c} · {len(registros) if c == 'Todos os Acessos' else contagem_entidades[c]}",
 )
 
 busca = normalizar(pesquisa).strip()
@@ -892,15 +932,18 @@ filtrados.sort(key=lambda e: (normalizar(e["nome"]), normalizar(e["municipio"]))
 # ==================================================
 # 8. EXIBIÇÃO DOS CARDS DE ACESSO
 # ==================================================
+resultado_rotulo = "entidade encontrada" if len(filtrados) == 1 else "entidades encontradas"
 st.markdown(
-    '<div class="ss-section"><h2 class="ss-section-title">Acessos disponíveis e cadastrados</h2>'
-    f'<p class="ss-section-sub">{len(filtrados)} resultado(s) encontrado(s)</p></div>',
+    '<div class="ss-section"><h2 class="ss-section-title">Entidades municipais</h2>'
+    f'<p class="ss-section-sub">{len(filtrados)} {resultado_rotulo}</p></div>',
     unsafe_allow_html=True,
 )
 if filtrados:
     renderizar_cards(filtrados)
 else:
-    st.markdown('<div class="ss-notice">Nenhum acesso encontrado para a pesquisa informada.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="ss-notice">Nenhuma entidade encontrada. Tente outro nome ou categoria.</div>', unsafe_allow_html=True)
+    if pesquisa:
+        st.button("Limpar pesquisa", icon=":material/close:", on_click=lambda: st.session_state.update(busca=""))
 
 # Há entidades cadastradas sem URL confirmada; permanecem pesquisáveis,
 # mas o botão de acesso só é exibido quando o endereço HTTPS existe.
