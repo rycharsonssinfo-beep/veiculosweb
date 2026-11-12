@@ -1,1 +1,1 @@
-.
+"""Compatibilidade com a implantação anterior do Streamlit.\n\nA aplicação completa está centralizada em main.py.\n"""\nfrom main import *  # noqa: F401,F403\n
