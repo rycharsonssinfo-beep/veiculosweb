@@ -10,6 +10,8 @@ em banco de dados. Favoritos e recentes permanecem apenas na aba do navegador.
 # 1. IMPORTAÇÕES E CONFIGURAÇÃO DA PÁGINA
 # ==================================================
 from collections import Counter, defaultdict
+from base64 import b64encode
+from functools import lru_cache
 from html import escape
 from pathlib import Path
 from urllib.parse import urlparse
@@ -44,18 +46,19 @@ CSS_BASE = r"""
 }
 html,body,[data-testid="stAppViewContainer"] {background:var(--ss-bg)!important;}
 [data-testid="stHeader"] {background:var(--ss-bg)!important;}
-.block-container {max-width:1440px;padding-top:.7rem;padding-bottom:2rem;}
-#MainMenu,footer {visibility:hidden;}
-.ss-brand {padding:.12rem 0 .1rem;}
+.block-container {max-width:1440px;padding-top:3.5rem;padding-bottom:2rem;}
+#MainMenu,footer:not(.ss-footer) {visibility:hidden;}
+.ss-brand {padding:.45rem 0 .4rem;overflow:visible;}
 .ss-kicker {text-transform:uppercase;letter-spacing:.14em;color:#007679;font-size:.72rem;font-weight:800;}
-.ss-title {font-size:clamp(1.75rem,3vw,2.55rem);font-weight:800;letter-spacing:-.045em;color:var(--ss-text);line-height:1.13;margin:5px 0;}
+.ss-title {font-size:clamp(1.75rem,3vw,2.55rem);font-weight:800;letter-spacing:-.045em;color:var(--ss-text);line-height:1.2;margin:4px 0 5px;padding:0!important;}
 .ss-subtitle {font-size:.99rem;font-weight:650;color:var(--ss-primary);margin:0;}
 .ss-description {font-size:.88rem;color:var(--ss-muted);margin:7px 0 0;}
 .ss-rule {height:1px;background:var(--ss-line);margin:12px 0 16px;}
 .ss-metrics {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:20px;}
 .ss-metric {display:flex;align-items:center;gap:13px;background:var(--ss-surface);border:1px solid var(--ss-line);border-radius:14px;padding:15px 18px;box-shadow:var(--ss-shadow);min-width:0;}
 .ss-metric-icon {width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:var(--ss-primary);background:var(--ss-soft);border-radius:11px;flex-shrink:0;}
-.ss-metric-icon svg {width:22px;height:22px;stroke:currentColor;}
+.ss-svg {display:block;object-fit:contain;max-width:100%;flex-shrink:0;}
+.ss-metric-icon .ss-svg {width:22px;height:22px;}
 .ss-metric-label {font-size:.78rem;color:var(--ss-muted);font-weight:600;}
 .ss-metric-value {font-size:1.7rem;font-weight:800;line-height:1.05;color:var(--ss-text);font-variant-numeric:tabular-nums;}
 .ss-section-head {display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:10px 0 9px;}
@@ -68,7 +71,7 @@ html,body,[data-testid="stAppViewContainer"] {background:var(--ss-bg)!important;
 .ss-card--pending {border-style:dashed;}
 .ss-card-top {display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:9px;}
 .ss-card-icon {width:31px;height:31px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:var(--ss-soft);color:var(--ss-primary);flex-shrink:0;}
-.ss-card-icon svg {width:18px;height:18px;stroke:currentColor;}
+.ss-card-icon .ss-svg {width:18px;height:18px;}
 .ss-tag {font-size:.69rem;font-weight:700;border-radius:100px;background:var(--ss-badge);color:var(--ss-badge-text);padding:4px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ss-fav {width:32px;height:32px;border:1px solid transparent;background:transparent;color:var(--ss-muted);border-radius:8px;cursor:pointer;font-size:1.5rem;line-height:1;}
 .ss-fav:hover,.ss-fav[aria-pressed="true"] {background:var(--ss-soft);color:var(--ss-primary);}
@@ -78,9 +81,9 @@ html,body,[data-testid="stAppViewContainer"] {background:var(--ss-bg)!important;
 .ss-actions {display:flex;gap:7px;align-items:center;}
 .ss-link {display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:1;min-height:43px;padding:6px 12px;background:var(--ss-primary);color:white!important;text-decoration:none!important;border-radius:9px;font-size:.82rem;font-weight:750;box-sizing:border-box;}
 .ss-link:hover {background:var(--ss-primary-hover);color:white!important;}
-.ss-link svg {width:15px;height:15px;stroke:currentColor;flex-shrink:0;}
+.ss-link .ss-svg {width:15px;height:15px;flex-shrink:0;filter:brightness(0) invert(1);}
 .ss-copy {min-height:43px;width:43px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--ss-line);color:var(--ss-primary);background:var(--ss-surface);border-radius:9px;cursor:pointer;}
-.ss-copy svg {height:17px;width:17px;stroke:currentColor;}
+.ss-copy .ss-svg {height:17px;width:17px;}
 .ss-copy:hover {background:var(--ss-soft);}
 .ss-no-link {width:100%;min-height:43px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:var(--ss-bg);border:1px dashed var(--ss-line);color:var(--ss-muted);font-size:.80rem;}
 .ss-group {margin:18px 0 22px;}
@@ -106,12 +109,12 @@ div[data-testid="stTextInput"] input:focus {border-color:var(--ss-primary);box-s
 @media (max-width:1100px) {.ss-grid {grid-template-columns:repeat(3,minmax(0,1fr));}}
 @media (max-width:790px) {.ss-grid {grid-template-columns:repeat(2,minmax(0,1fr));}.ss-metrics {gap:8px;}.ss-metric {padding:11px 13px;}}
 @media (max-width:560px) {
-  .block-container {padding-left:1rem;padding-right:1rem;padding-top:.35rem;}
+  .block-container {padding-left:1rem;padding-right:1rem;padding-top:3.35rem;}
   .ss-grid {grid-template-columns:1fr;gap:10px;}
   .ss-metrics {grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
   .ss-metric {display:block;padding:10px 9px;border-radius:11px;}
   .ss-metric-icon {width:28px;height:28px;margin-bottom:7px;}
-  .ss-metric-icon svg {width:17px;height:17px;}
+  .ss-metric-icon .ss-svg {width:17px;height:17px;}
   .ss-metric-label {font-size:.68rem;line-height:1.2;}
   .ss-metric-value {font-size:1.45rem;}
   .ss-card {min-height:154px;}
@@ -798,6 +801,8 @@ ICONES = {
     "SAAEs": '<path d="M12 22a8 8 0 0 0 8-8c0-5-8-12-8-12S4 9 4 14a8 8 0 0 0 8 8Z"/><path d="M9 16a3 3 0 0 0 3 3"/>',
     "Ativos": '<path d="M20 6 9 17l-5-5"/>',
     "Pendentes": '<path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.72 3h16.92a2 2 0 0 0 1.72-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>',
+    "Abrir": '<path d="M7 17 17 7M8 7h9v9"/>',
+    "Copiar": '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
 }
 
 
@@ -865,12 +870,21 @@ def diagnosticar(itens):
     return problemas
 
 
+@lru_cache(maxsize=32)
 def svg_icone(categoria):
+    """Imagem SVG local em data URI; o sanitizador do st.html remove tags <svg>."""
     corpo = ICONES.get(categoria, ICONES["Todas"])
+    cor = "#92ded9" if TEMA_ESCURO else "#006b6d"
+    svg = (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" '
+        'fill="none" stroke="' + cor + '" stroke-width="1.9" '
+        'stroke-linecap="round" stroke-linejoin="round">'
+        + corpo + '</svg>'
+    )
+    codificado = b64encode(svg.encode("utf-8")).decode("ascii")
     return (
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
-        'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" '
-        f'aria-hidden="true">{corpo}</svg>'
+        '<img class="ss-svg" alt="" aria-hidden="true" '
+        f'src="data:image/svg+xml;base64,{codificado}">'
     )
 
 
@@ -936,10 +950,10 @@ def criar_card(entidade):
             + '" data-name="' + nome + '" data-url="' + destino
             + '" href="' + destino
             + '" target="_blank" rel="noopener noreferrer">Abrir sistema '
-            + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>'
+            + svg_icone("Abrir") + '</a>'
             + '<button type="button" class="ss-copy" data-action="copy" '
             + 'data-url="' + destino + '" title="Copiar link" aria-label="Copiar link de '
-            + nome + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>'
+            + nome + '">' + svg_icone("Copiar") + '</button>'
         )
         status = ""
     else:
@@ -998,7 +1012,8 @@ INTERACOES_JS = r"""
     let visible = 0;
     cardList().forEach(card => {
       const selected = favorites.has(card.dataset.key);
-      const button = card.querySelector('[data-action="favorite"]');      if (button) {
+      const button = card.querySelector('[data-action="favorite"]');
+      if (button) {
         button.textContent = selected ? '★' : '☆';
         button.setAttribute('aria-pressed', String(selected));
         button.setAttribute('aria-label', (selected?'Remover dos favoritos: ':'Favoritar: ')+card.querySelector('.ss-card-title').textContent);
@@ -1189,8 +1204,7 @@ def painel_pesquisa():
         st.button("Limpar filtros", icon=":material/refresh:", key="limpar", on_click=limpar_filtros, use_container_width=True)
     lista = filtrar(registros, pesquisa, categoria or "Todas", somente_com_link)
     st.html(
-        '<div class="ss-section-head"><h2>Entidades municipais</h2>'
-        '<p>' + str(len(lista)) + ' resultado(s) encontrado(s)</p></div>'
+        '<div class="ss-section-head"><h2>Entidades municipais</h2></div>'
     )
     if not lista:
         st.html('<div class="ss-empty" role="status">Nenhuma entidade encontrada. Tente outro nome ou remova os filtros.</div>')
