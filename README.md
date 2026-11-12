@@ -6,14 +6,21 @@ Central de navegação do **Grupo S&S Informática**, desenvolvida em Python e S
 
 - Pesquisa por nome, município ou categoria, ignorando maiúsculas e acentos, com atualização após 250 ms sem digitar.
 - Pesquisa e filtros isolados em um `st.fragment`, mantendo o cabeçalho e os indicadores sem reconstrução desnecessária.
-- Filtros de **Prefeituras, Câmaras, Consórcios, Institutos e SAAEs**; opção **Somente com link**.
+- Filtros de **Prefeituras, Câmaras, Consórcios, Institutos, SAAEs e Ambientes especiais**; opção **Somente com link**.
 - Ordenação priorizando correspondências exatas, seguidas de prefixos e correspondências parciais.
 - Visualização individual ou **agrupada por município**.
 - Cards compactos com botões para abrir o endereço original em outra aba, copiar o link e marcar favoritos.
 - **Favoritos** e **abertos recentemente** restritos à aba do navegador. Utilizam `sessionStorage`, sem banco de dados nem compartilhamento entre usuários. Ao encerrar a aba, os dados poderão ser descartados pelo navegador.
 - Atalho **Ctrl+K** (ou **Cmd+K**, onde o navegador permitir) para focar a pesquisa.
 - Tema corporativo nas aparências clara e escura, com contraste e layout responsivo.
-- Seção de conferência de entidades sem URL e endereços ainda não associados.
+- Seção de conferência dos 7 registros sem link e das classificações sugeridas para os 26 acessos adicionais; os endereços são sempre pesquisáveis e abertos em nova aba.
+
+## Quantidades iniciais (novembro de 2026)
+
+- 89 entidades na planilha de origem (82 com link, 7 sem URL).
+- 25 links adicionais do TXT incorporados à lista principal.
+- 1 novo link `https://ssveiculos.ssinformatica.net/IPMparaipaba`, classificado provisoriamente como Instituto.
+- **108 URLs únicas** disponíveis nos cards, **115 registros** no painel incluindo os 7 sem URL.
 
 ## Estrutura
 
@@ -36,11 +43,11 @@ Abra `main.py` e localize a lista `ENTIDADES`:
 },
 ```
 
-As categorias aceitas são **Prefeituras**, **Câmaras**, **Consórcios**, **Institutos** e **SAAEs**. Cada URL precisa ser confirmada e transcrita exatamente como fornecida. Não invente endereço: use `"url": ""` quando ainda não houver link conhecido.
+As categorias aceitas são **Prefeituras**, **Câmaras**, **Consórcios**, **Institutos**, **SAAEs** e **Ambientes especiais**. Cada URL precisa ser confirmada e transcrita exatamente como fornecida. Não invente endereço: use `"url": ""` quando ainda não houver link conhecido.
 
 Ao salvar, a pesquisa, os filtros e os indicadores serão atualizados automaticamente. Não adicione senhas ou tokens neste arquivo; o repositório é público.
 
-Endereços ainda sem vínculo confirmado ficam na lista `URLS_EM_CONFERENCIA`. Revise esses registros antes de associar uma URL a uma entidade.
+Os links adicionais fornecidos apenas por URL ficam em `ACESSOS_ADICIONAIS` e **já aparecem nos cards e na pesquisa**. Seus nomes e categorias são rótulos operacionais, marcados como "Classificação a conferir". O cadastro mantém também as entidades sem endereço, com botão desabilitado.
 
 ## Executar localmente
 

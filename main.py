@@ -77,6 +77,7 @@ html,body,[data-testid="stAppViewContainer"] {background:var(--ss-bg)!important;
 .ss-fav:hover,.ss-fav[aria-pressed="true"] {background:var(--ss-soft);color:var(--ss-primary);}
 .ss-card-title {font-size:.92rem;font-weight:750;color:var(--ss-text);line-height:1.38;margin:0 0 6px;overflow-wrap:anywhere;}
 .ss-card-city {font-size:.79rem;color:var(--ss-muted);margin:0 0 11px;}
+.ss-review {font-size:.71rem;color:var(--ss-muted);margin:0 0 8px;font-weight:600;}
 .ss-grow {flex:1;min-height:8px;}
 .ss-actions {display:flex;gap:7px;align-items:center;}
 .ss-link {display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:1;min-height:43px;padding:6px 12px;background:var(--ss-primary);color:white!important;text-decoration:none!important;border-radius:9px;font-size:.82rem;font-weight:750;box-sizing:border-box;}
@@ -143,7 +144,7 @@ st.html('<style>'+CSS_BASE+(CSS_DARK if TEMA_ESCURO else '')+'</style>')
 # ==================================================
 # Edite esta lista para acrescentar, remover ou atualizar entidades.
 # Não invente URL para registros pendentes: mantenha url="" até confirmar.
-# Categorias aceitas: Prefeituras, Câmaras, Consórcios, Institutos, SAAEs.
+# Categorias: Prefeituras, Câmaras, Consórcios, Institutos, SAAEs e Ambientes especiais.
 ENTIDADES = [
     {
         "nome": "Prefeitura Municipal de Abaiara",
@@ -681,112 +682,195 @@ ENTIDADES = [
     }
 ]
 
-# URLs recebidas no TXT mas não atribuídas com segurança a uma das 89 entidades.
-# Não aparecem como botões de acesso municipal até validação humana.
-URLS_EM_CONFERENCIA = [
+# Acessos adicionais fornecidos por URL: todos aparecem nos cards e na pesquisa.
+# A classificação é operacional (sugerida pelo caminho), não confirmação cadastral.
+# Para confirmar ou corrigir um registro, altere nome/categoria/municipio aqui.
+ACESSOS_ADICIONAIS = [
     {
+        "nome": "Prefeitura de Acaraú",
+        "municipio": "Acaraú",
+        "categoria": "Prefeituras",
         "url": "https://ssveiculos.ssinformatica.net/Acarau",
-        "slug": "Acarau"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Prefeitura de Aquiraz",
+        "municipio": "Aquiraz",
+        "categoria": "Prefeituras",
         "url": "https://ssveiculos.ssinformatica.net/Aquiraz",
-        "slug": "Aquiraz"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Prefeitura de Aracoiaba",
+        "municipio": "Aracoiaba",
+        "categoria": "Prefeituras",
         "url": "https://ssveiculos.ssinformatica.net/Aracoiaba",
-        "slug": "Aracoiaba"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Prefeitura de Assaré",
+        "municipio": "Assaré",
+        "categoria": "Prefeituras",
         "url": "https://ssveiculos.ssinformatica.net/Assare",
-        "slug": "Assare"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Prefeitura de Choró",
+        "municipio": "Choró",
+        "categoria": "Prefeituras",
         "url": "https://ssveiculos.ssinformatica.net/Choro",
-        "slug": "Choro"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Câmara de Ereré",
+        "municipio": "Ereré",
+        "categoria": "Câmaras",
         "url": "https://ssveiculos.ssinformatica.net/CMErere",
-        "slug": "CMErere"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Câmara de Fortaleza",
+        "municipio": "Fortaleza",
+        "categoria": "Câmaras",
         "url": "https://ssveiculos.ssinformatica.net/CMFortaleza",
-        "slug": "CMFortaleza"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Câmara de Guaiúba",
+        "municipio": "Guaiúba",
+        "categoria": "Câmaras",
         "url": "https://ssveiculos.ssinformatica.net/CMGuaiuba",
-        "slug": "CMGuaiuba"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Câmara de Irauçuba",
+        "municipio": "Irauçuba",
+        "categoria": "Câmaras",
         "url": "https://ssveiculos.ssinformatica.net/CMIraucuba",
-        "slug": "CMIraucuba"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Consórcio — Alto Jaguaribe",
+        "municipio": "Alto Jaguaribe",
+        "categoria": "Consórcios",
         "url": "https://ssveiculos.ssinformatica.net/CPRAltoJaguaribe",
-        "slug": "CPRAltoJaguaribe"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Consórcio — Araripe",
+        "municipio": "Araripe",
+        "categoria": "Consórcios",
         "url": "https://ssveiculos.ssinformatica.net/CPSAraripe",
-        "slug": "CPSAraripe"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Consórcio — Brejo Santo",
+        "municipio": "Brejo Santo",
+        "categoria": "Consórcios",
         "url": "https://ssveiculos.ssinformatica.net/CPSBrejoSanto",
-        "slug": "CPSBrejoSanto"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Consórcio — Cascavel",
+        "municipio": "Cascavel",
+        "categoria": "Consórcios",
         "url": "https://ssveiculos.ssinformatica.net/CPSCascavel",
-        "slug": "CPSCascavel"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Prefeitura de Guaraciaba do Norte",
+        "municipio": "Guaraciaba do Norte",
+        "categoria": "Prefeituras",
         "url": "https://ssveiculos.ssinformatica.net/GuaraciabaNorte",
-        "slug": "GuaraciabaNorte"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Hidrolândia — Ambiente recuperado",
+        "municipio": "Hidrolândia",
+        "categoria": "Ambientes especiais",
         "url": "https://ssveiculos.ssinformatica.net/HidrolandiaRecuperado",
-        "slug": "HidrolandiaRecuperado"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Prefeitura de Ipueiras",
+        "municipio": "Ipueiras",
+        "categoria": "Prefeituras",
         "url": "https://ssveiculos.ssinformatica.net/Ipueiras",
-        "slug": "Ipueiras"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Prefeitura de Iracema",
+        "municipio": "Iracema",
+        "categoria": "Prefeituras",
         "url": "https://ssveiculos.ssinformatica.net/Iracema",
-        "slug": "Iracema"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Prefeitura de Jaguaruana",
+        "municipio": "Jaguaruana",
+        "categoria": "Prefeituras",
         "url": "https://ssveiculos.ssinformatica.net/Jaguaruana",
-        "slug": "Jaguaruana"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Prefeitura de Morrinhos",
+        "municipio": "Morrinhos",
+        "categoria": "Prefeituras",
         "url": "https://ssveiculos.ssinformatica.net/Morrinhos",
-        "slug": "Morrinhos"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Prefeitura de Pacoti",
+        "municipio": "Pacoti",
+        "categoria": "Prefeituras",
         "url": "https://ssveiculos.ssinformatica.net/Pacoti",
-        "slug": "Pacoti"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Prefeitura de Potiretama",
+        "municipio": "Potiretama",
+        "categoria": "Prefeituras",
         "url": "https://ssveiculos.ssinformatica.net/Potiretama",
-        "slug": "Potiretama"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "SAAE de Pedra Branca",
+        "municipio": "Pedra Branca",
+        "categoria": "SAAEs",
         "url": "https://ssveiculos.ssinformatica.net/SaaePedraBranca",
-        "slug": "SaaePedraBranca"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "SS Informática — Ambiente interno",
+        "municipio": "Grupo S&S",
+        "categoria": "Ambientes especiais",
         "url": "https://ssveiculos.ssinformatica.net/SSInformatica",
-        "slug": "SSInformatica"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Ambiente de Treinamento",
+        "municipio": "Grupo S&S",
+        "categoria": "Ambientes especiais",
         "url": "https://ssveiculos.ssinformatica.net/Treinamento",
-        "slug": "Treinamento"
+        "conferencia": "Classificação a conferir"
     },
     {
+        "nome": "Prefeitura de Ubajara",
+        "municipio": "Ubajara",
+        "categoria": "Prefeituras",
         "url": "https://ssveiculos.ssinformatica.net/Ubajara",
-        "slug": "Ubajara"
+        "conferencia": "Classificação a conferir"
+    },
+    {
+        "nome": "IPM Paraipaba",
+        "municipio": "Paraipaba",
+        "categoria": "Institutos",
+        "url": "https://ssveiculos.ssinformatica.net/IPMparaipaba",
+        "conferencia": "Classificação a conferir"
     }
 ]
-
-CATEGORIAS = ["Prefeituras", "Câmaras", "Consórcios", "Institutos", "SAAEs"]
+CATEGORIAS = ["Prefeituras", "Câmaras", "Consórcios", "Institutos", "SAAEs", "Ambientes especiais"]
+ROTULOS_CATEGORIA = {"Prefeituras": "Prefeitura", "Câmaras": "Câmara", "Consórcios": "Consórcio", "Institutos": "Instituto", "SAAEs": "SAAE", "Ambientes especiais": "Ambiente especial"}
 
 
 # ==================================================
@@ -799,6 +883,7 @@ ICONES = {
     "Consórcios": '<circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M11 7 6 17M13 7l5 10M7 19h10"/>',
     "Institutos": '<path d="m3 9 9-6 9 6M4 10h16M6 10v10M10 10v10M14 10v10M18 10v10M3 21h18"/>',
     "SAAEs": '<path d="M12 22a8 8 0 0 0 8-8c0-5-8-12-8-12S4 9 4 14a8 8 0 0 0 8 8Z"/><path d="M9 16a3 3 0 0 0 3 3"/>',
+    "Ambientes especiais": '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/>',
     "Ativos": '<path d="M20 6 9 17l-5-5"/>',
     "Pendentes": '<path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.72 3h16.92a2 2 0 0 0 1.72-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>',
     "Abrir": '<path d="M7 17 17 7M8 7h9v9"/>',
@@ -912,7 +997,7 @@ def filtrar(itens, termo="", categoria="Todas", somente_com_link=False):
         and (not somente_com_link or url_valida(e["url"]))
         and (
             not termo or termo in normalizar(" ".join(
-                (e["nome"], e["municipio"], e["categoria"])
+                (e["nome"], e["municipio"], e["categoria"], urlparse(e["url"]).path.lstrip("/"))
             ))
         )
     ]
@@ -921,7 +1006,7 @@ def filtrar(itens, termo="", categoria="Todas", somente_com_link=False):
 
 def renderizar_indicadores(total, com_url, pendentes):
     dados = [
-        ("Todas", "Entidades", total),
+        ("Todas", "Registros", total),
         ("Ativos", "Com link", com_url),
         ("Pendentes", "Pendentes", pendentes),
     ]
@@ -940,7 +1025,8 @@ def criar_card(entidade):
     """Card com URL original, favorito por sessão e cópia rápida."""
     nome = escape(entidade["nome"], quote=True)
     cidade = escape(entidade["municipio"], quote=True)
-    cat = escape(entidade["categoria"].removesuffix("s"), quote=True)
+    cat = escape(ROTULOS_CATEGORIA.get(entidade["categoria"], entidade["categoria"]), quote=True)
+    classificacao = bool(entidade.get("conferencia"))
     chave = escape(id_entidade(entidade), quote=True)
     url = entidade["url"]
     if url_valida(url):
@@ -967,6 +1053,7 @@ def criar_card(entidade):
         + f'<button type="button" class="ss-fav" data-action="favorite" data-key="{chave}" '
         + f'aria-pressed="false" aria-label="Favoritar {nome}" title="Favoritar">☆</button></div>'
         + f'<h3 class="ss-card-title">{nome}</h3><p class="ss-card-city">{cidade}</p>'
+        + ('<p class="ss-review">Classificação a conferir</p>' if classificacao else '')
         + f'<div class="ss-grow"></div><div class="ss-actions">{acoes}</div></article>'
     )
 
@@ -1160,8 +1247,8 @@ with titulo:
     </header>""")
 st.html('<div class="ss-rule" aria-hidden="true"></div>')
 
-registros = catalogo_unico(ENTIDADES)
-alertas_cadastro = diagnosticar(ENTIDADES)
+registros = catalogo_unico(ENTIDADES + ACESSOS_ADICIONAIS)
+alertas_cadastro = diagnosticar(ENTIDADES + ACESSOS_ADICIONAIS)
 com_link = sum(url_valida(e["url"]) for e in registros)
 pendentes = len(registros) - com_link
 renderizar_indicadores(len(registros), com_link, pendentes)
@@ -1204,7 +1291,7 @@ def painel_pesquisa():
         st.button("Limpar filtros", icon=":material/refresh:", key="limpar", on_click=limpar_filtros, use_container_width=True)
     lista = filtrar(registros, pesquisa, categoria or "Todas", somente_com_link)
     st.html(
-        '<div class="ss-section-head"><h2>Entidades municipais</h2></div>'
+        '<div class="ss-section-head"><h2>Entidades e ambientes</h2></div>'
     )
     if not lista:
         st.html('<div class="ss-empty" role="status">Nenhuma entidade encontrada. Tente outro nome ou remova os filtros.</div>')
@@ -1218,19 +1305,20 @@ painel_pesquisa()
 # ==================================================
 # 8. CONFERÊNCIA CADASTRAL
 # ==================================================
-with st.expander(f"Conferência cadastral · {pendentes} sem link / {len(URLS_EM_CONFERENCIA)} URLs não associadas", expanded=False):
-    st.caption("Estes registros não são apresentados como sistemas municipais com link confirmado.")
-    st.markdown("**Entidades aguardando endereço**")
+with st.expander(f"Conferência cadastral · {pendentes} registros sem URL / {len(ACESSOS_ADICIONAIS)} acessos adicionais", expanded=False):
+    st.caption("Todos os links recebidos estão disponíveis nos cards. A classificação de acessos adicionais foi sugerida a partir do endereço e pode ser corrigida no main.py.")
+    st.markdown("**Registros sem endereço**")
     for e in registros:
         if not url_valida(e["url"]):
-            st.markdown(f"- {escape(e['nome'])} ({escape(e['categoria'])})")
-    st.markdown("**Endereços recebidos ainda sem correspondência confirmada**")
-    st.code("\n".join(x["url"] for x in URLS_EM_CONFERENCIA), language="text")
+            st.markdown(f"- {e['nome']} ({e['categoria']})")
+    st.markdown("**Acessos adicionais já exibidos no painel — classificação a conferir**")
+    for e in ACESSOS_ADICIONAIS:
+        st.markdown(f"- [{e['nome']}]({e['url']}) · {e['categoria']}")
     if alertas_cadastro:
         st.warning("Foram encontradas inconsistências no cadastro. Verifique antes de publicar novas alterações.")
-        st.code("\n".join(alertas_cadastro), language="text")
+        st.code("\\n".join(alertas_cadastro), language="text")
     else:
-        st.caption("Cadastro principal sem nomes, categorias ou URLs duplicados/inválidos.")
+        st.caption("Nenhum nome, categoria ou endereço duplicado/inválido detectado.")
 
 # ==================================================
 # 9. RODAPÉ INSTITUCIONAL

@@ -29,14 +29,14 @@ jobs:
           names = {}
           for node in tree.body:
               if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
-                  if node.targets[0].id in ('ENTIDADES', 'URLS_EM_CONFERENCIA', 'CATEGORIAS'):
+                  if node.targets[0].id in ('ENTIDADES', 'ACESSOS_ADICIONAIS', 'CATEGORIAS'):
                       names[node.targets[0].id] = ast.literal_eval(node.value)
           entidades = names['ENTIDADES']
-          conferencias = names['URLS_EM_CONFERENCIA']
+          adicionais = names['ACESSOS_ADICIONAIS']
           categorias = names['CATEGORIAS']
           assert entidades, 'Cadastro vazio'
           vistos, urls = set(), set()
-          for e in entidades:
+          for e in entidades + adicionais:
               assert set(('nome','municipio','categoria','url')) <= set(e), e
               assert e['nome'].strip() and e['municipio'].strip(), e
               assert e['categoria'] in categorias, e
@@ -49,10 +49,7 @@ jobs:
                   assert u.scheme=='https' and u.hostname=='ssveiculos.ssinformatica.net' and u.path not in ('','/'), e
                   assert e['url'] not in urls, f'URL duplicada: {e}'
                   urls.add(e['url'])
-          for p in conferencias:
-              u = urlparse(p['url'])
-              assert u.scheme=='https' and u.hostname=='ssveiculos.ssinformatica.net' and u.path not in ('','/'), p
-              assert p['url'] not in urls, f'URL duplicada na conferência: {p}'
-              urls.add(p['url'])
-          print(f'OK — {len(entidades)} entidades; {len(urls)} URLs únicas')
+          assert len(urls) >= 108, f'Esperados pelo menos 108 endereços; encontrados {len(urls)}'
+          assert 'https://ssveiculos.ssinformatica.net/IPMparaipaba' in urls
+          print(f'OK — {len(entidades)} entidades de origem, {len(adicionais)} acessos adicionais; {len(urls)} URLs únicas')
           PY
