@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
 """Painel de Acessos — Sistema de Veículos | Grupo S&S Informática.
 
-Manutenção: edite somente a lista ENTIDADES abaixo para alterar os acessos.
-Todos os links foram transcritos de ListagemVeiculos.txt, sem criação de URLs.
-Registros sem vínculo inequívoco são mantidos para conferência e não
-aparecem como sistemas com acesso disponível.
+Todo o cadastro, a interface e as funções da aplicação estão neste arquivo.
+O projeto não armazena senhas, dados de autenticação nem informações de sessão
+em banco de dados. Favoritos e recentes permanecem apenas na aba do navegador.
 """
 
 # ==================================================
 # 1. IMPORTAÇÕES E CONFIGURAÇÃO DA PÁGINA
 # ==================================================
-from collections import Counter
+from collections import Counter, defaultdict
 from html import escape
 from pathlib import Path
-import unicodedata
 from urllib.parse import urlparse
+import unicodedata
 
 import streamlit as st
 
@@ -28,112 +27,113 @@ st.set_page_config(
 # ==================================================
 # 2. IDENTIDADE VISUAL E ESTILIZAÇÃO CSS
 # ==================================================
-st.markdown("""
-<style>
+# A detecção de tema considera a seleção no menu do próprio Streamlit,
+# não somente a preferência de cores do sistema operacional.
+try:
+    TEMA_ESCURO = st.context.theme.type == "dark"
+except (AttributeError, RuntimeError):
+    TEMA_ESCURO = False
+
+CSS_BASE = r"""
 :root {
-    --ss-primary: #006363;
-    --ss-teal: #007f86;
-    --ss-ink: #19383c;
-    --ss-muted: #67777b;
-    --ss-line: #e2eeee;
-    --ss-bg: #f5f9f9;
-    --ss-soft: #e8f5f3;
+  --ss-primary:#006b6d; --ss-primary-hover:#005254;
+  --ss-bg:#f6f9f9; --ss-surface:#ffffff; --ss-soft:#e9f5f3;
+  --ss-text:#183a3d; --ss-muted:#546d70; --ss-line:#dbe8e6;
+  --ss-badge:#eaf3f2; --ss-badge-text:#236366;
+  --ss-shadow:0 3px 16px rgba(12,69,70,.055);
 }
-html, body, [data-testid="stAppViewContainer"] {background:#f8fafa;}
-[data-testid="stHeader"] {background:rgba(248,250,250,.96);}
-.block-container {max-width: 1450px; padding-top: 1.1rem; padding-bottom: 2.6rem;}
-#MainMenu, footer {visibility:hidden;}
-.ss-top-accent {height:5px; max-width:180px; border-radius:12px; background:linear-gradient(90deg,#007f86,#006363); margin: 3px 0 13px;}
-.ss-header {margin: 8px 0 12px;}
-.ss-kicker {font-size:.76rem; text-transform:uppercase; letter-spacing:.16em; font-weight:700; color:var(--ss-teal);}
-.ss-title {font-size:clamp(1.95rem,3.7vw,3.1rem); letter-spacing:-.04em; font-weight:790; line-height:1.13; color:#113f43; margin:.2rem 0 .35rem;}
-.ss-subtitle {font-size:1.02rem; font-weight:650; color:#306166; margin:.25rem 0 .35rem;}
-.ss-description {font-size:.93rem; line-height:1.55; color:var(--ss-muted); margin:.3rem 0 .9rem;}
-.ss-divider {border:0;border-top:1px solid #e4eded; margin:16px 0 21px;}
-.ss-section {margin:15px 0 8px;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;}
-.ss-section-title {font-size:1.20rem;font-weight:770;color:var(--ss-ink);margin:0;letter-spacing:-.02em;}
-.ss-section-sub {font-size:.86rem;color:var(--ss-muted);margin:0;}
-.ss-kpis {display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin:12px 0 22px;}
-.ss-kpi {background:#fff;border:1px solid #e2ebeb;border-radius:15px;padding:17px 16px 15px;box-shadow:0 2px 9px rgba(19,79,79,.035);min-width:0;}
-.ss-kpi-label {font-size:.78rem;font-weight:600;color:#65787a;line-height:1.3;}
-.ss-kpi-count {color:#0d4b4c;font-weight:800;font-size:1.9rem;letter-spacing:-.05em;line-height:1.25;margin-top:8px;}
-.ss-kpi-top {display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.ss-icon {height:31px;width:31px;border-radius:9px;color:#00737b;background:#edf7f6;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
-.ss-icon svg {height:17px;width:17px;stroke:currentColor;}
-.ss-search-caption {font-size:.86rem;color:var(--ss-muted);margin:5px 0 8px;}
-.ss-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin:12px 0 12px;}
-.ss-card {background:#fff;border:1px solid #e1ebea;border-radius:16px;box-shadow:0 3px 12px rgba(24,74,74,.04);min-width:0;padding:19px 18px 17px;display:flex;flex-direction:column;min-height:218px;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;}
-.ss-card:hover {border-color:#a7cecd;box-shadow:0 9px 26px rgba(18,78,79,.10);transform:translateY(-2px);}
-.ss-card-top {display:flex;justify-content:space-between;align-items:center;margin-bottom:13px;gap:8px;}
-.ss-card-icon {display:inline-flex;align-items:center;justify-content:center;border-radius:11px;background:#eaf6f5;color:#00767b;width:37px;height:37px;flex-shrink:0;}
-.ss-card-icon svg {width:20px;height:20px;stroke:currentColor;}
-.ss-pill {font-size:.70rem;font-weight:700;padding:5px 9px;border-radius:999px;background:#f0f6f5;color:#33696a;white-space:nowrap;}
-.ss-card-title {font-size:1.005rem;line-height:1.37;font-weight:750;color:#1d3e43;margin:0 0 9px;overflow-wrap:anywhere;}
-.ss-card-city {font-size:.82rem;color:#536669;margin-bottom:18px;}
-.ss-card-city strong {font-weight:620;color:#536669;}
-.ss-card-spacer {flex:1;}
-.ss-cta,.ss-no-link {width:100%;min-height:40px;border-radius:10px;display:inline-flex;justify-content:center;align-items:center;gap:8px;font-size:.88rem;font-weight:750;text-decoration:none!important;box-sizing:border-box;}
-.ss-cta {background:#006a6c;color:#fff!important;border:1px solid #006a6c;transition:background .15s,transform .15s;}
-.ss-cta:hover {background:#005253;color:#fff!important;}
-.ss-cta:focus-visible {outline:3px solid #3da8ab;outline-offset:3px;}
-.ss-cta svg {width:16px;height:16px;stroke:currentColor;}
-.ss-no-link {color:#536669;border:1px dashed #d0dede;background:#f6f9f9;}
-.ss-notice {border:1px solid #e1eceb;border-radius:12px;background:white;padding:20px;color:#587477;text-align:center;margin:14px 0;}
-.ss-footer {margin-top:28px;border-top:1px solid #dceae9;padding-top:18px;color:#536669;font-size:.81rem;text-align:center;}
-/* Os controles de pesquisa e categoria continuam nativos e acessíveis. */
-div[data-testid="stTextInput"] input {border-radius:11px;background:#fff;border-color:#dae8e7;min-height:47px;}
-div[data-testid="stTextInput"] input:focus {border-color:#007f86;box-shadow:0 0 0 1px #007f86;}
-@media (max-width:1180px) {
-    .ss-kpis {grid-template-columns:repeat(3,minmax(0,1fr));}
-    .ss-grid {grid-template-columns:repeat(3,minmax(0,1fr));}
+html,body,[data-testid="stAppViewContainer"] {background:var(--ss-bg)!important;}
+[data-testid="stHeader"] {background:var(--ss-bg)!important;}
+.block-container {max-width:1440px;padding-top:.7rem;padding-bottom:2rem;}
+#MainMenu,footer {visibility:hidden;}
+.ss-brand {padding:.12rem 0 .1rem;}
+.ss-kicker {text-transform:uppercase;letter-spacing:.14em;color:#007679;font-size:.72rem;font-weight:800;}
+.ss-title {font-size:clamp(1.75rem,3vw,2.55rem);font-weight:800;letter-spacing:-.045em;color:var(--ss-text);line-height:1.13;margin:5px 0;}
+.ss-subtitle {font-size:.99rem;font-weight:650;color:var(--ss-primary);margin:0;}
+.ss-description {font-size:.88rem;color:var(--ss-muted);margin:7px 0 0;}
+.ss-rule {height:1px;background:var(--ss-line);margin:12px 0 16px;}
+.ss-metrics {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:20px;}
+.ss-metric {display:flex;align-items:center;gap:13px;background:var(--ss-surface);border:1px solid var(--ss-line);border-radius:14px;padding:15px 18px;box-shadow:var(--ss-shadow);min-width:0;}
+.ss-metric-icon {width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:var(--ss-primary);background:var(--ss-soft);border-radius:11px;flex-shrink:0;}
+.ss-metric-icon svg {width:22px;height:22px;stroke:currentColor;}
+.ss-metric-label {font-size:.78rem;color:var(--ss-muted);font-weight:600;}
+.ss-metric-value {font-size:1.7rem;font-weight:800;line-height:1.05;color:var(--ss-text);font-variant-numeric:tabular-nums;}
+.ss-section-head {display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:10px 0 9px;}
+.ss-section-head h2 {font-size:1.12rem;letter-spacing:-.017em;color:var(--ss-text);margin:0;font-weight:760;}
+.ss-section-head p {font-size:.81rem;color:var(--ss-muted);margin:0;}
+.ss-results-meta {margin:4px 0 12px;color:var(--ss-muted);font-size:.82rem;}
+.ss-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:12px 0;}
+.ss-card {display:flex;flex-direction:column;min-width:0;background:var(--ss-surface);border:1px solid var(--ss-line);border-radius:14px;padding:14px;min-height:172px;box-shadow:var(--ss-shadow);transition:box-shadow .15s,border-color .15s,transform .15s;}
+.ss-card:hover {border-color:#8dbfbc;box-shadow:0 9px 22px rgba(10,72,73,.12);transform:translateY(-2px);}
+.ss-card--pending {border-style:dashed;}
+.ss-card-top {display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:9px;}
+.ss-card-icon {width:31px;height:31px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:var(--ss-soft);color:var(--ss-primary);flex-shrink:0;}
+.ss-card-icon svg {width:18px;height:18px;stroke:currentColor;}
+.ss-tag {font-size:.69rem;font-weight:700;border-radius:100px;background:var(--ss-badge);color:var(--ss-badge-text);padding:4px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ss-fav {width:32px;height:32px;border:1px solid transparent;background:transparent;color:var(--ss-muted);border-radius:8px;cursor:pointer;font-size:1.5rem;line-height:1;}
+.ss-fav:hover,.ss-fav[aria-pressed="true"] {background:var(--ss-soft);color:var(--ss-primary);}
+.ss-card-title {font-size:.92rem;font-weight:750;color:var(--ss-text);line-height:1.38;margin:0 0 6px;overflow-wrap:anywhere;}
+.ss-card-city {font-size:.79rem;color:var(--ss-muted);margin:0 0 11px;}
+.ss-grow {flex:1;min-height:8px;}
+.ss-actions {display:flex;gap:7px;align-items:center;}
+.ss-link {display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:1;min-height:43px;padding:6px 12px;background:var(--ss-primary);color:white!important;text-decoration:none!important;border-radius:9px;font-size:.82rem;font-weight:750;box-sizing:border-box;}
+.ss-link:hover {background:var(--ss-primary-hover);color:white!important;}
+.ss-link svg {width:15px;height:15px;stroke:currentColor;flex-shrink:0;}
+.ss-copy {min-height:43px;width:43px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--ss-line);color:var(--ss-primary);background:var(--ss-surface);border-radius:9px;cursor:pointer;}
+.ss-copy svg {height:17px;width:17px;stroke:currentColor;}
+.ss-copy:hover {background:var(--ss-soft);}
+.ss-no-link {width:100%;min-height:43px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:var(--ss-bg);border:1px dashed var(--ss-line);color:var(--ss-muted);font-size:.80rem;}
+.ss-group {margin:18px 0 22px;}
+.ss-group-title {font-weight:760;font-size:.95rem;color:var(--ss-text);margin:0 0 6px;}
+.ss-group-title small {color:var(--ss-muted);font-weight:500;font-size:.76rem;}
+.ss-toolbar {display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap;margin-top:6px;}
+.ss-fav-filter {background:var(--ss-surface);color:var(--ss-text);border:1px solid var(--ss-line);border-radius:9px;padding:8px 13px;font-size:.82rem;font-weight:680;cursor:pointer;min-height:42px;}
+.ss-fav-filter[aria-pressed="true"] {background:var(--ss-soft);border-color:var(--ss-primary);color:var(--ss-primary);}
+.ss-recent {margin:13px 0 12px;display:none;}
+.ss-recent-label {font-size:.79rem;color:var(--ss-muted);font-weight:650;margin-bottom:8px;}
+.ss-recent-links {display:flex;gap:7px;flex-wrap:wrap;}
+.ss-recent-link {display:inline-flex;min-height:35px;align-items:center;border:1px solid var(--ss-line);border-radius:50px;padding:5px 11px;color:var(--ss-text)!important;background:var(--ss-surface);text-decoration:none!important;font-size:.79rem;}
+.ss-recent-link:hover {background:var(--ss-soft);}
+.ss-empty {border:1px dashed var(--ss-line);border-radius:13px;background:var(--ss-surface);padding:24px 18px;color:var(--ss-muted);text-align:center;font-size:.89rem;}
+.ss-hidden {display:none!important;}
+.ss-toast {position:fixed;bottom:20px;right:22px;background:#144849;color:white;border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.21);padding:10px 14px;z-index:1000;font-size:.85rem;display:none;}
+.ss-footer {margin:24px 0 0;padding:16px 0 6px;border-top:1px solid var(--ss-line);font-size:.79rem;color:var(--ss-muted);text-align:center;}
+.ss-accessibility-note {font-size:.74rem;color:var(--ss-muted);margin-top:2px;}
+.ss-fav:focus-visible,.ss-copy:focus-visible,.ss-link:focus-visible,.ss-fav-filter:focus-visible,.ss-recent-link:focus-visible {outline:3px solid #55b9b4;outline-offset:2px;}
+div[data-testid="stTextInput"] input {background:var(--ss-surface);color:var(--ss-text);min-height:46px;border-radius:11px;border-color:var(--ss-line);}
+div[data-testid="stTextInput"] input::placeholder {color:var(--ss-muted);}
+div[data-testid="stTextInput"] input:focus {border-color:var(--ss-primary);box-shadow:0 0 0 1px var(--ss-primary);}
+@media (max-width:1100px) {.ss-grid {grid-template-columns:repeat(3,minmax(0,1fr));}}
+@media (max-width:790px) {.ss-grid {grid-template-columns:repeat(2,minmax(0,1fr));}.ss-metrics {gap:8px;}.ss-metric {padding:11px 13px;}}
+@media (max-width:560px) {
+  .block-container {padding-left:1rem;padding-right:1rem;padding-top:.35rem;}
+  .ss-grid {grid-template-columns:1fr;gap:10px;}
+  .ss-metrics {grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  .ss-metric {display:block;padding:10px 9px;border-radius:11px;}
+  .ss-metric-icon {width:28px;height:28px;margin-bottom:7px;}
+  .ss-metric-icon svg {width:17px;height:17px;}
+  .ss-metric-label {font-size:.68rem;line-height:1.2;}
+  .ss-metric-value {font-size:1.45rem;}
+  .ss-card {min-height:154px;}
+  .ss-title {font-size:1.7rem;}
+  .ss-toast {left:12px;right:12px;bottom:12px;}
 }
-@media (max-width:850px) {
-    .ss-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
-    .ss-kpis {grid-template-columns:repeat(3,minmax(0,1fr));}
+@media (prefers-reduced-motion:reduce) {.ss-card {transition:none;}.ss-card:hover {transform:none;}}
+"""
+CSS_DARK = r"""
+:root {
+ --ss-primary:#18979a;--ss-primary-hover:#0e8083;
+ --ss-bg:#101e21;--ss-surface:#1c3034;--ss-soft:#29474b;
+ --ss-text:#e9f5f4;--ss-muted:#b4cccd;--ss-line:#395458;
+ --ss-badge:#29484c;--ss-badge-text:#d0e9e9;
+ --ss-shadow:0 4px 18px rgba(0,0,0,.15);
 }
-@media (max-width:600px) {
-    .block-container {padding-left:1.05rem;padding-right:1.05rem;padding-top:.5rem;}
-    .ss-grid {grid-template-columns:1fr;gap:11px;}
-    .ss-kpis {grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}
-    .ss-kpi {padding:12px 12px 10px;border-radius:12px;}
-    .ss-kpi-count {font-size:1.55rem;}
-    .ss-card {min-height:190px;padding:16px;}
-    .ss-title {font-size:1.92rem;}
-    .ss-kpi-label {font-size:.73rem;}
-}
-
-/* Modo escuro do sistema: os componentes personalizados acompanham o Streamlit. */
-@media (prefers-color-scheme: dark) {
-  :root { --ss-ink:#e9f3f3; --ss-muted:#aec4c6; --ss-line:#375154; }
-  html, body, [data-testid="stAppViewContainer"] {background:#101e21!important;color:#eaf3f3;}
-  [data-testid="stHeader"] {background:rgba(16,30,33,.96)!important;}
-  .ss-kicker {color:#7bd5d2;}
-  .ss-title,.ss-section-title {color:#eaf7f6;}
-  .ss-subtitle {color:#bee0df;}
-  .ss-description,.ss-section-sub,.ss-search-caption {color:#acc5c7;}
-  .ss-divider {border-color:#355054;}
-  .ss-kpi,.ss-card {background:#1b3033;border-color:#385458;box-shadow:0 3px 13px rgba(0,0,0,.17);}
-  .ss-card:hover {border-color:#5a9696;box-shadow:0 9px 26px rgba(0,0,0,.24);}
-  .ss-kpi-label {color:#bbd2d3;}
-  .ss-kpi-count {color:#e8fcf9;}
-  .ss-icon,.ss-card-icon {background:#264548;color:#8fdbd4;}
-  .ss-card-title {color:#f0f8f8;}
-  .ss-card-city,.ss-card-city strong {color:#bad0d2;}
-  .ss-pill {background:#29484c;color:#cee9e8;}
-  .ss-cta {background:#006e72;color:#fff!important;border-color:#16868a;}
-  .ss-cta:hover {background:#00595d;}
-  .ss-no-link {background:#25383b;border-color:#4b666a;color:#b3c9ca;}
-  .ss-notice {background:#1c3033;border-color:#385458;color:#c9dede;}
-  .ss-footer {color:#acc4c6;border-color:#355054;}
-  div[data-testid="stTextInput"] input {background:#1b3033!important;color:#f1f9f9!important;border-color:#48686c!important;}
-  div[data-testid="stTextInput"] input::placeholder {color:#afc5c6!important;}
-  /* A marca contém texto verde escuro: a base clara mantém sua legibilidade. */
-  div[data-testid="stImage"] {background:#fff;padding:9px;border-radius:12px;box-sizing:border-box;}
-}
-
-@media (prefers-reduced-motion:reduce) {.ss-card,.ss-cta {transition:none!important;}}
-</style>
-""", unsafe_allow_html=True)
+.ss-link {background:#087c80;color:#fff!important;}
+div[data-testid="stImage"] {background:#ffffff;padding:6px;border-radius:10px;width:max-content;max-width:100%;}
+.ss-link:hover {background:#06686c;}
+.ss-kicker {color:#77cecb;}
+"""
+st.html('<style>'+CSS_BASE+(CSS_DARK if TEMA_ESCURO else '')+'</style>')
 
 # ==================================================
 # 3. CADASTRO DE ENTIDADES E LINKS
@@ -785,171 +785,439 @@ URLS_EM_CONFERENCIA = [
 
 CATEGORIAS = ["Prefeituras", "Câmaras", "Consórcios", "Institutos", "SAAEs"]
 
-# Ícones vetoriais locais; não dependem de serviços ou CDNs externos.
+
+# ==================================================
+# 4. ÍCONES, VALIDAÇÕES E FUNÇÕES AUXILIARES
+# ==================================================
 ICONES = {
-    "Todos os Acessos": '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+    "Todas": '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
     "Prefeituras": '<path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-7h6v7M8 10h1M15 10h1"/>',
     "Câmaras": '<path d="M3 21h18M5 21V9h14v12M9 21v-5h6v5M5 9l7-5 7 5M9 12h1M14 12h1"/>',
     "Consórcios": '<circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M11 7 6 17M13 7l5 10M7 19h10"/>',
     "Institutos": '<path d="m3 9 9-6 9 6M4 10h16M6 10v10M10 10v10M14 10v10M18 10v10M3 21h18"/>',
     "SAAEs": '<path d="M12 22a8 8 0 0 0 8-8c0-5-8-12-8-12S4 9 4 14a8 8 0 0 0 8 8Z"/><path d="M9 16a3 3 0 0 0 3 3"/>',
+    "Ativos": '<path d="M20 6 9 17l-5-5"/>',
+    "Pendentes": '<path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.72 3h16.92a2 2 0 0 0 1.72-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>',
 }
 
-# ==================================================
-# 4. FUNÇÕES AUXILIARES
-# ==================================================
+
 def normalizar(texto):
-    """Permite pesquisa e ordenação sem distinguir acentos ou maiúsculas."""
-    texto = str(texto or "")
-    return "".join(c for c in unicodedata.normalize("NFKD", texto) if not unicodedata.combining(c)).casefold()
+    """Normalização com remoção de acentos, inclusive letras em maiúsculas."""
+    return "".join(
+        c for c in unicodedata.normalize("NFKD", str(texto or ""))
+        if not unicodedata.combining(c)
+    ).casefold()
 
 
-def url_valida(endereco):
-    """Exige URL HTTPS completa; nunca tenta adivinhar o endereço."""
-    if not isinstance(endereco, str) or not endereco.strip():
+def url_valida(url):
+    """Somente HTTPS e domínio oficial; o caminho original não é modificado."""
+    if not isinstance(url, str) or not url or any(c.isspace() for c in url):
         return False
     try:
-        parsed = urlparse(endereco)
-        return parsed.scheme == "https" and bool(parsed.hostname) and not any(c.isspace() for c in endereco)
+        p = urlparse(url)
+        return (
+            p.scheme == "https"
+            and p.hostname == "ssveiculos.ssinformatica.net"
+            and not p.username and not p.password
+            and not p.port
+            and p.path not in ("", "/")
+        )
     except ValueError:
         return False
 
 
-def svg_icone(categoria):
-    corpo = ICONES.get(categoria, ICONES["Todos os Acessos"])
-    return f'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{corpo}</svg>'
+def id_entidade(entidade):
+    return "|".join(normalizar(entidade[k]) for k in ("nome", "municipio", "categoria"))
 
 
-def entidades_unicas(itens):
-    """Desconsidera repetições de entidade/categoria/município no painel."""
+def catalogo_unico(itens):
+    """Remove duplicações de entidades sem fabricar URLs."""
     unicos = {}
-    for entidade in itens:
-        chave = (normalizar(entidade["nome"]), normalizar(entidade["municipio"]), entidade["categoria"])
-        if chave not in unicos or (not url_valida(unicos[chave]["url"]) and url_valida(entidade["url"])):
-            unicos[chave] = entidade
+    for item in itens:
+        chave = id_entidade(item)
+        if chave not in unicos or (not unicos[chave]["url"] and item["url"]):
+            unicos[chave] = item
     return list(unicos.values())
 
 
-def renderizar_indicadores(registros, totais):
-    itens = [("Todos os Acessos", "Sistemas disponíveis", totais["Total de Acessos"])]
-    itens.extend((cat, cat, totais[cat]) for cat in CATEGORIAS)
-    partes = ['<section class="ss-kpis" aria-label="Indicadores do painel">']
-    for cat, rotulo, quantidade in itens:
+def diagnosticar(itens):
+    """Validação simples para evitar regressões ao editar o cadastro."""
+    problemas, nomes, urls = [], set(), set()
+    obrigatorios = ("nome", "municipio", "categoria", "url")
+    for indice, e in enumerate(itens, 1):
+        if any(k not in e for k in obrigatorios):
+            problemas.append(f"Registro {indice}: campo obrigatório ausente")
+            continue
+        ident = id_entidade(e)
+        if ident in nomes:
+            problemas.append(f"Registro repetido: {e['nome']}")
+        nomes.add(ident)
+        if e["categoria"] not in CATEGORIAS:
+            problemas.append(f"Categoria inválida: {e['nome']}")
+        if not e["nome"].strip() or not e["municipio"].strip():
+            problemas.append(f"Nome ou município em branco: registro {indice}")
+        if e["url"]:
+            if not url_valida(e["url"]):
+                problemas.append(f"URL inválida ou fora do domínio oficial: {e['nome']}")
+            if e["url"] in urls:
+                problemas.append(f"URL repetida: {e['url']}")
+            urls.add(e["url"])
+    return problemas
+
+
+def svg_icone(categoria):
+    corpo = ICONES.get(categoria, ICONES["Todas"])
+    return (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+        'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" '
+        f'aria-hidden="true">{corpo}</svg>'
+    )
+
+
+def ordem_busca(entidade, termo):
+    """Correspondência exata, início de palavra e por fim ocorrências gerais."""
+    nome, municipio = normalizar(entidade["nome"]), normalizar(entidade["municipio"])
+    if not termo:
+        prioridade = 0
+    elif termo in (nome, municipio):
+        prioridade = 0
+    elif nome.startswith(termo) or municipio.startswith(termo):
+        prioridade = 1
+    elif any(p.startswith(termo) for p in nome.split() + municipio.split()):
+        prioridade = 2
+    else:
+        prioridade = 3
+    return (prioridade, nome, municipio)
+
+
+def filtrar(itens, termo="", categoria="Todas", somente_com_link=False):
+    termo = normalizar(termo).strip()
+    filtrados = [
+        e for e in itens
+        if (categoria == "Todas" or e["categoria"] == categoria)
+        and (not somente_com_link or url_valida(e["url"]))
+        and (
+            not termo or termo in normalizar(" ".join(
+                (e["nome"], e["municipio"], e["categoria"])
+            ))
+        )
+    ]
+    return sorted(filtrados, key=lambda e: ordem_busca(e, termo))
+
+
+def renderizar_indicadores(total, com_url, pendentes):
+    dados = [
+        ("Todas", "Entidades", total),
+        ("Ativos", "Com link", com_url),
+        ("Pendentes", "Pendentes", pendentes),
+    ]
+    partes = ['<div class="ss-metrics" aria-label="Resumo do cadastro">']
+    for categoria, titulo, numero in dados:
         partes.append(
-            f'<div class="ss-kpi"><div class="ss-kpi-top">'
-            f'<span class="ss-kpi-label">{escape(rotulo)}</span>'
-            f'<span class="ss-icon">{svg_icone(cat)}</span></div>'
-            f'<div class="ss-kpi-count">{quantidade}</div></div>'
+            '<div class="ss-metric"><div class="ss-metric-icon">'
+            + svg_icone(categoria) + '</div><div><div class="ss-metric-label">'
+            + escape(titulo) + '</div><div class="ss-metric-value">'
+            + str(numero) + '</div></div></div>'
         )
-    partes.append('</section>')
-    st.markdown("".join(partes), unsafe_allow_html=True)
+    st.html("".join(partes) + "</div>")
 
 
-def renderizar_cards(lista):
-    """Cards responsivos com links originais; abrem em nova aba sem iframe."""
-    resultado = ['<section class="ss-grid" aria-label="Entidades municipais">']
-    seta = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>'
-    for e in lista:
-        nome, municipio, categoria = (escape(e[k], quote=True) for k in ("nome", "municipio", "categoria"))
-        if url_valida(e["url"]):
-            destino = escape(e["url"], quote=True)
-            acesso = f'<a class="ss-cta" href="{destino}" target="_blank" rel="noopener noreferrer" aria-label="Abrir sistema de {nome} (nova aba)">Abrir sistema {seta}</a>'
-        else:
-            acesso = '<span class="ss-no-link" aria-label="Link não cadastrado">Link não cadastrado</span>'
-        resultado.append(
-            f'<article class="ss-card"><div class="ss-card-top">'
-            f'<span class="ss-card-icon">{svg_icone(e["categoria"])}</span>'
-            f'<span class="ss-pill">{categoria}</span></div>'
-            f'<div class="ss-card-title">{nome}</div>'
-            f'<div class="ss-card-city">Município: <strong>{municipio}</strong></div>'
-            f'<div class="ss-card-spacer"></div>{acesso}</article>'
+def criar_card(entidade):
+    """Card com URL original, favorito por sessão e cópia rápida."""
+    nome = escape(entidade["nome"], quote=True)
+    cidade = escape(entidade["municipio"], quote=True)
+    cat = escape(entidade["categoria"].removesuffix("s"), quote=True)
+    chave = escape(id_entidade(entidade), quote=True)
+    url = entidade["url"]
+    if url_valida(url):
+        destino = escape(url, quote=True)
+        acoes = (
+            '<a class="ss-link" data-action="open" data-key="' + chave
+            + '" data-name="' + nome + '" data-url="' + destino
+            + '" href="' + destino
+            + '" target="_blank" rel="noopener noreferrer">Abrir sistema '
+            + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>'
+            + '<button type="button" class="ss-copy" data-action="copy" '
+            + 'data-url="' + destino + '" title="Copiar link" aria-label="Copiar link de '
+            + nome + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>'
         )
-    resultado.append('</section>')
-    st.markdown("".join(resultado), unsafe_allow_html=True)
+        status = ""
+    else:
+        acoes = '<span class="ss-no-link">Link não cadastrado</span>'
+        status = " ss-card--pending"
+    return (
+        f'<article class="ss-card{status}" data-key="{chave}">'
+        '<div class="ss-card-top"><span class="ss-card-icon">'
+        + svg_icone(entidade["categoria"])
+        + f'</span><span class="ss-tag">{cat}</span>'
+        + f'<button type="button" class="ss-fav" data-action="favorite" data-key="{chave}" '
+        + f'aria-pressed="false" aria-label="Favoritar {nome}" title="Favoritar">☆</button></div>'
+        + f'<h3 class="ss-card-title">{nome}</h3><p class="ss-card-city">{cidade}</p>'
+        + f'<div class="ss-grow"></div><div class="ss-actions">{acoes}</div></article>'
+    )
 
 
 # ==================================================
-# 5. CABEÇALHO DA APLICAÇÃO
+# 5. INTERAÇÕES DOS CARDS — SOMENTE DADOS DE NAVEGAÇÃO
+# ==================================================
+# O JS atua apenas sobre HTML produzido a partir do cadastro local. Nenhum
+# conteúdo HTML externo, arquivo remoto ou credencial é interpretado aqui.
+# Favoritos e histórico são individuais por aba, usando sessionStorage.
+INTERACOES_JS = r"""
+<script>
+(() => {
+  'use strict';
+  const root = document.getElementById('ss-directory');
+  if (!root || root.dataset.initialized === '1') return;
+  root.dataset.initialized = '1';
+  const keys = {fav:'ss-veiculos:favs:v2',recent:'ss-veiculos:recent:v2',only:'ss-veiculos:only-favs:v2'};
+  const memory = window.__ssVeiculosMemory || (window.__ssVeiculosMemory={});
+  const read = (key, fallback) => {
+    try { const raw = window.sessionStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+    catch (e) { return key in memory ? memory[key] : fallback; }
+  };
+  const save = (key, value) => {
+    memory[key] = value;
+    try { window.sessionStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+  };
+  const getFavorites = () => new Set(read(keys.fav, []));
+  const cardList = () => Array.from(root.querySelectorAll('.ss-card'));
+  let onlyFavorites = Boolean(read(keys.only, false));
+  const toast = root.querySelector('.ss-toast');
+  const notify = (message) => {
+    toast.textContent = message; toast.style.display='block';
+    clearTimeout(root.__ssToastTimeout);
+    root.__ssToastTimeout = setTimeout(() => {toast.style.display='none'}, 2400);
+  };
+  function refreshFavorites() {
+    const favorites = getFavorites();
+    const toggle = root.querySelector('[data-action="favorites-filter"]');
+    toggle.setAttribute('aria-pressed', String(onlyFavorites));
+    toggle.textContent = (onlyFavorites ? '★ Exibir todas' : '☆ Meus favoritos') + ' ('+favorites.size+')';
+    let visible = 0;
+    cardList().forEach(card => {
+      const selected = favorites.has(card.dataset.key);
+      const button = card.querySelector('[data-action="favorite"]');      if (button) {
+        button.textContent = selected ? '★' : '☆';
+        button.setAttribute('aria-pressed', String(selected));
+        button.setAttribute('aria-label', (selected?'Remover dos favoritos: ':'Favoritar: ')+card.querySelector('.ss-card-title').textContent);
+        button.title = selected?'Remover favorito':'Favoritar';
+      }
+      const hide = onlyFavorites && !selected;
+      card.classList.toggle('ss-hidden',hide);
+      if (!hide) visible++;
+    });
+    root.querySelectorAll('.ss-group').forEach(group => {
+      group.classList.toggle('ss-hidden', !group.querySelector('.ss-card:not(.ss-hidden)'));
+    });
+    const empty = root.querySelector('[data-fav-empty]');
+    if (empty) empty.classList.toggle('ss-hidden', visible > 0);
+    const count = root.querySelector('[data-result-count]');
+    if (count) count.textContent = visible+' '+(visible===1?'entidade exibida':'entidades exibidas');
+  }
+  function recordAccess(name,url,key) {
+    if (!url || !url.startsWith('https://ssveiculos.ssinformatica.net/')) return;
+    const previous = read(keys.recent, []);
+    const history = [{name,url,key},...previous.filter(item => item.key !== key)].slice(0,6);
+    save(keys.recent,history);
+    refreshRecents();
+  }
+  function refreshRecents() {
+    const items = read(keys.recent, []);
+    const bar = root.querySelector('.ss-recent');
+    const container = root.querySelector('.ss-recent-links');
+    container.replaceChildren();
+    bar.style.display = items.length ? 'block':'none';
+    items.forEach(item => {
+      if (!item.url || !item.url.startsWith('https://ssveiculos.ssinformatica.net/')) return;
+      const link = document.createElement('a');
+      link.className = 'ss-recent-link';
+      link.href=item.url; link.target='_blank'; link.rel='noopener noreferrer';
+      link.textContent=item.name; link.title=item.name;
+      link.dataset.action='recent-open';link.dataset.key=item.key;
+      container.appendChild(link);
+    });
+  }
+  root.addEventListener('click', async (event) => {
+    const control = event.target.closest('[data-action]');
+    if (!control || !root.contains(control)) return;
+    const action=control.dataset.action;
+    if(action==='favorite'){
+      const fav=getFavorites();
+      fav.has(control.dataset.key)?fav.delete(control.dataset.key):fav.add(control.dataset.key);
+      save(keys.fav,[...fav]); refreshFavorites();
+    }
+    if(action==='favorites-filter'){
+      onlyFavorites=!onlyFavorites;
+      save(keys.only,onlyFavorites); refreshFavorites();
+    }
+    if(action==='copy'){
+      try {await navigator.clipboard.writeText(control.dataset.url);notify('Link copiado.');}
+      catch (e) { window.prompt('Copie o endereço:',control.dataset.url); }
+    }
+    if(action==='open'){
+      recordAccess(control.dataset.name,control.dataset.url,control.dataset.key);
+    }
+    if(action==='recent-open'){
+      recordAccess(control.textContent,control.href,control.dataset.key);
+    }
+  });
+  if (!window.__ssVeiculosShortcutInstalled) {
+    document.addEventListener('keydown', (event) => {
+      if ((event.ctrlKey||event.metaKey) && event.key.toLowerCase()==='k') {
+        const input=document.querySelector('input[type="search"]');
+        if (input) {event.preventDefault(); input.focus(); input.select();}
+      }
+    });
+    window.__ssVeiculosShortcutInstalled=true;
+  }
+  refreshFavorites(); refreshRecents();
+})();
+</script>
+"""
+
+
+def renderizar_lista(lista, agrupar=False):
+    partes = ['<div id="ss-directory" class="ss-directory">']
+    partes.append(
+        '<div class="ss-toolbar"><span class="ss-results-meta" '
+        'data-result-count aria-live="polite">'
+        + f'{len(lista)} entidades exibidas</span>'
+        + '<button type="button" data-action="favorites-filter" '
+        'class="ss-fav-filter" aria-pressed="false">☆ Meus favoritos</button></div>'
+    )
+    partes.append(
+        '<nav class="ss-recent" aria-label="Sistemas abertos recentemente">'
+        '<div class="ss-recent-label">Abertos recentemente nesta aba</div>'
+        '<div class="ss-recent-links"></div></nav>'
+    )
+    if agrupar:
+        grupos = defaultdict(list)
+        for e in lista:
+            grupos[e["municipio"]].append(e)
+        for cidade in sorted(grupos, key=normalizar):
+            itens = grupos[cidade]
+            partes.append(
+                '<section class="ss-group"><h3 class="ss-group-title">'
+                + escape(cidade)
+                + f' <small>({len(itens)} {"entidade" if len(itens)==1 else "entidades"})</small>'
+                + '</h3><div class="ss-grid">'
+            )
+            partes.extend(criar_card(e) for e in itens)
+            partes.append('</div></section>')
+    else:
+        partes.append('<section class="ss-grid" aria-label="Entidades municipais">')
+        partes.extend(criar_card(e) for e in lista)
+        partes.append('</section>')
+    partes.append(
+        '<div class="ss-empty ss-hidden" data-fav-empty>'
+        'Nenhuma entidade favoritada nesta seleção.</div>'
+        '<div class="ss-toast" role="status" aria-live="polite"></div></div>'
+    )
+    # st.html não usa iframe; todos os botões ficam acessíveis ao teclado.
+    st.html(''.join(partes)+INTERACOES_JS, unsafe_allow_javascript=True)
+
+
+def limpar_filtros():
+    st.session_state["busca"] = ""
+    st.session_state["categoria_atual"] = "Todas"
+    st.session_state["somente_link"] = False
+    st.session_state["agrupar"] = False
+
+
+# ==================================================
+# 6. CABEÇALHO E INDICADORES (RENDERIZAÇÃO ESTÁTICA)
 # ==================================================
 logo_path = Path(__file__).resolve().parent / "Grupo-SS.png"
-marca, titulo = st.columns([1.25, 3.9], gap="medium", vertical_alignment="center")
+marca, titulo = st.columns([1.25, 5.5], gap="medium", vertical_alignment="center")
 with marca:
     if logo_path.is_file():
-        st.image(str(logo_path), use_container_width=True)
+        st.image(str(logo_path), width=210)
     else:
         st.markdown("**Grupo S&S**")
 with titulo:
-    st.markdown("""<div class="ss-header">
-        <div class="ss-top-accent"></div>
-        <div class="ss-kicker">Grupo S&S · Gestão Municipal</div>
-        <h1 class="ss-title">Painel de Acessos</h1>
-        <div class="ss-subtitle">Sistema de Veículos</div>
-        <div class="ss-description">Encontre e abra rapidamente o ambiente de cada entidade.</div>
-    </div>""", unsafe_allow_html=True)
-st.markdown('<hr class="ss-divider"/>', unsafe_allow_html=True)
+    st.html("""<header class="ss-brand">
+      <div class="ss-kicker">Central municipal</div>
+      <h1 class="ss-title">Painel de Acessos</h1>
+      <p class="ss-subtitle">Sistema de Veículos</p>
+      <p class="ss-description">Localize a entidade e abra seu ambiente de trabalho.</p>
+    </header>""")
+st.html('<div class="ss-rule" aria-hidden="true"></div>')
+
+registros = catalogo_unico(ENTIDADES)
+alertas_cadastro = diagnosticar(ENTIDADES)
+com_link = sum(url_valida(e["url"]) for e in registros)
+pendentes = len(registros) - com_link
+renderizar_indicadores(len(registros), com_link, pendentes)
 
 # ==================================================
-# 6. INDICADORES DO PAINEL
+# 7. PESQUISA E FILTROS — FRAGMENTO RÁPIDO
 # ==================================================
-registros = entidades_unicas(ENTIDADES)
-quantidades = Counter(e["categoria"] for e in registros if url_valida(e["url"]))
-contagem = {cat: quantidades.get(cat, 0) for cat in CATEGORIAS}
-contagem["Total de Acessos"] = sum(contagem.values())
-renderizar_indicadores(registros, contagem)
+@st.fragment
+
+def painel_pesquisa():
+    st.html(
+        '<div class="ss-section-head"><h2>Encontrar entidade</h2>'
+        '<p>Ctrl + K para buscar rapidamente</p></div>'
+    )
+    pesquisa = st.text_input(
+        "Pesquisar por nome ou município",
+        placeholder="Ex.: Maranguape, Caucaia ou SAAE",
+        key="busca",
+        type="search",
+        live="250ms",
+        label_visibility="collapsed",
+    )
+    totais_por_categoria = Counter(e["categoria"] for e in registros)
+    categoria = st.pills(
+        "Categorias",
+        ["Todas"] + CATEGORIAS,
+        default="Todas",
+        required=True,
+        key="categoria_atual",
+        label_visibility="collapsed",
+        format_func=lambda c: f"{c} · {len(registros) if c == 'Todas' else totais_por_categoria[c]}",
+        wrap=True,
+    )
+    left, mid, right = st.columns([1.45, 1.45, 1], gap="small", vertical_alignment="center")
+    with left:
+        somente_com_link = st.toggle("Somente com link", value=False, key="somente_link")
+    with mid:
+        agrupar = st.toggle("Agrupar por município", value=False, key="agrupar")
+    with right:
+        st.button("Limpar filtros", icon=":material/refresh:", key="limpar", on_click=limpar_filtros, use_container_width=True)
+    lista = filtrar(registros, pesquisa, categoria or "Todas", somente_com_link)
+    st.html(
+        '<div class="ss-section-head"><h2>Entidades municipais</h2>'
+        '<p>' + str(len(lista)) + ' resultado(s) encontrado(s)</p></div>'
+    )
+    if not lista:
+        st.html('<div class="ss-empty" role="status">Nenhuma entidade encontrada. Tente outro nome ou remova os filtros.</div>')
+    # Sempre renderiza o histórico, mesmo que a pesquisa não tenha resultados.
+    renderizar_lista(lista, agrupar=agrupar)
+    st.html('<p class="ss-accessibility-note">Favoritos e recentes ficam somente nesta aba do navegador.</p>')
+
+
+painel_pesquisa()
 
 # ==================================================
-# 7. PESQUISA E FILTROS POR CATEGORIA
+# 8. CONFERÊNCIA CADASTRAL
 # ==================================================
-st.markdown('<div class="ss-section"><h2 class="ss-section-title">Localizar entidade</h2><p class="ss-section-sub">Busca por nome ou município</p></div>', unsafe_allow_html=True)
-pesquisa = st.text_input(
-    "Pesquisar por nome ou município",
-    placeholder="Ex.: Maranguape, Caucaia ou SAAE",
-    key="busca",
-    label_visibility="collapsed",
-    icon=":material/search:",
-    type="search",
-    live="250ms",  # Streamlit >= 1.64: atualiza após uma pausa ao digitar.
-)
-
-# Os filtros contam entidades cadastradas, inclusive as que ainda aguardam URL.
-# Os indicadores acima, por outro lado, contam apenas sistemas com URL confirmada.
-contagem_entidades = Counter(e["categoria"] for e in registros)
-escolhas = ["Todos os Acessos"] + CATEGORIAS
-categoria = st.pills(
-    "Filtrar por categoria", escolhas, default="Todos os Acessos", required=True,
-    key="categoria_atual", label_visibility="collapsed", wrap=True,
-    format_func=lambda c: f"{'Todos' if c == 'Todos os Acessos' else c} · {len(registros) if c == 'Todos os Acessos' else contagem_entidades[c]}",
-)
-
-busca = normalizar(pesquisa).strip()
-filtrados = [
-    e for e in registros
-    if (categoria == "Todos os Acessos" or e["categoria"] == categoria)
-    and (not busca or busca in normalizar(" ".join((e["nome"], e["municipio"], e["categoria"]))))
-]
-filtrados.sort(key=lambda e: (normalizar(e["nome"]), normalizar(e["municipio"])))
-
-# ==================================================
-# 8. EXIBIÇÃO DOS CARDS DE ACESSO
-# ==================================================
-resultado_rotulo = "entidade encontrada" if len(filtrados) == 1 else "entidades encontradas"
-st.markdown(
-    '<div class="ss-section"><h2 class="ss-section-title">Entidades municipais</h2>'
-    f'<p class="ss-section-sub">{len(filtrados)} {resultado_rotulo}</p></div>',
-    unsafe_allow_html=True,
-)
-if filtrados:
-    renderizar_cards(filtrados)
-else:
-    st.markdown('<div class="ss-notice">Nenhuma entidade encontrada. Tente outro nome ou categoria.</div>', unsafe_allow_html=True)
-    if pesquisa:
-        st.button("Limpar pesquisa", icon=":material/close:", on_click=lambda: st.session_state.update(busca=""))
-
-# Há entidades cadastradas sem URL confirmada; permanecem pesquisáveis,
-# mas o botão de acesso só é exibido quando o endereço HTTPS existe.
-# URLs_EM_CONFERENCIA não são exibidas como acessos municipais até validação.
+with st.expander(f"Conferência cadastral · {pendentes} sem link / {len(URLS_EM_CONFERENCIA)} URLs não associadas", expanded=False):
+    st.caption("Estes registros não são apresentados como sistemas municipais com link confirmado.")
+    st.markdown("**Entidades aguardando endereço**")
+    for e in registros:
+        if not url_valida(e["url"]):
+            st.markdown(f"- {escape(e['nome'])} ({escape(e['categoria'])})")
+    st.markdown("**Endereços recebidos ainda sem correspondência confirmada**")
+    st.code("\n".join(x["url"] for x in URLS_EM_CONFERENCIA), language="text")
+    if alertas_cadastro:
+        st.warning("Foram encontradas inconsistências no cadastro. Verifique antes de publicar novas alterações.")
+        st.code("\n".join(alertas_cadastro), language="text")
+    else:
+        st.caption("Cadastro principal sem nomes, categorias ou URLs duplicados/inválidos.")
 
 # ==================================================
 # 9. RODAPÉ INSTITUCIONAL
 # ==================================================
-st.markdown('<div class="ss-footer">Grupo S&S Informática | Soluções para Gestão Municipal</div>', unsafe_allow_html=True)
+st.html('<footer class="ss-footer">Grupo S&S Informática | Soluções para Gestão Municipal</footer>')

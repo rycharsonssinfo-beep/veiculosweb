@@ -1,0 +1,58 @@
+name: Validar painel de veículos
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Sintaxe
+        run: python -m py_compile main.py app.py
+      - name: Consistência cadastral
+        run: |
+          python - <<'PY'
+          import ast
+          from collections import Counter
+          from pathlib import Path
+          from urllib.parse import urlparse
+          import unicodedata
+
+          source = Path('main.py').read_text(encoding='utf-8')
+          tree = ast.parse(source)
+          names = {}
+          for node in tree.body:
+              if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+                  if node.targets[0].id in ('ENTIDADES', 'URLS_EM_CONFERENCIA', 'CATEGORIAS'):
+                      names[node.targets[0].id] = ast.literal_eval(node.value)
+          entidades = names['ENTIDADES']
+          conferencias = names['URLS_EM_CONFERENCIA']
+          categorias = names['CATEGORIAS']
+          assert entidades, 'Cadastro vazio'
+          vistos, urls = set(), set()
+          for e in entidades:
+              assert set(('nome','municipio','categoria','url')) <= set(e), e
+              assert e['nome'].strip() and e['municipio'].strip(), e
+              assert e['categoria'] in categorias, e
+              normalizar = lambda s: ''.join(c for c in unicodedata.normalize('NFKD', s) if not unicodedata.combining(c)).casefold()
+              identidade = (normalizar(e['nome']), normalizar(e['municipio']), e['categoria'])
+              assert identidade not in vistos, f'Entidade duplicada: {e}'
+              vistos.add(identidade)
+              if e['url']:
+                  u = urlparse(e['url'])
+                  assert u.scheme=='https' and u.hostname=='ssveiculos.ssinformatica.net' and u.path not in ('','/'), e
+                  assert e['url'] not in urls, f'URL duplicada: {e}'
+                  urls.add(e['url'])
+          for p in conferencias:
+              u = urlparse(p['url'])
+              assert u.scheme=='https' and u.hostname=='ssveiculos.ssinformatica.net' and u.path not in ('','/'), p
+              assert p['url'] not in urls, f'URL duplicada na conferência: {p}'
+              urls.add(p['url'])
+          print(f'OK — {len(entidades)} entidades; {len(urls)} URLs únicas')
+          PY
