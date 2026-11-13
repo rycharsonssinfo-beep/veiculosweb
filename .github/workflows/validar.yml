@@ -33,7 +33,12 @@ jobs:
           assert 'Somente com link' not in codigo
           assert 'st.toggle("Agrupar por município"' in codigo
           assert 'Central municipal' not in codigo
+          assert 'renderizar_indicadores' not in codigo
+          assert 'ss-metrics' not in codigo
+          assert 'st.pills(' in codigo
+          assert 'Conferência cadastral' in codigo
           estilo = Path('assets/painel.css').read_text(encoding='utf-8')
+          assert '.ss-metrics' not in estilo
           assert 'horizontal_alignment="center"' in codigo
           assert 'key="filtros_centralizados"' in codigo
           assert 'width="content"' in codigo

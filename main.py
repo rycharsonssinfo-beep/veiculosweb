@@ -178,23 +178,6 @@ def filtrar(itens, termo="", categoria="Todas"):
     return sorted(filtrados, key=lambda e: ordem_busca(e, termo))
 
 
-def renderizar_indicadores(total, com_url, pendentes):
-    dados = [
-        ("Todas", "Registros", total),
-        ("Ativos", "Com link", com_url),
-        ("Pendentes", "Pendentes", pendentes),
-    ]
-    partes = ['<div class="ss-metrics" aria-label="Resumo do cadastro">']
-    for categoria, titulo, numero in dados:
-        partes.append(
-            '<div class="ss-metric"><div class="ss-metric-icon">'
-            + svg_icone(categoria) + '</div><div><div class="ss-metric-label">'
-            + escape(titulo) + '</div><div class="ss-metric-value">'
-            + str(numero) + '</div></div></div>'
-        )
-    st.html("".join(partes) + "</div>")
-
-
 def destacar_termo(texto, termo):
     """Destaca a correspondência sem perder acentos ou aceitar HTML da pesquisa."""
     texto = str(texto)
@@ -335,7 +318,7 @@ def limpar_filtros():
 
 
 # ==================================================
-# 6. CABEÇALHO E INDICADORES (RENDERIZAÇÃO ESTÁTICA)
+# 6. CABEÇALHO COMPACTO (RENDERIZAÇÃO ESTÁTICA)
 # ==================================================
 logo_path = PASTA_ASSETS / "veiculosweb.png"
 marca, titulo = st.columns([1.75, 4.9], gap="medium", vertical_alignment="center")
@@ -355,7 +338,6 @@ registros = catalogo_unico(ENTIDADES + ACESSOS_ADICIONAIS)
 alertas_cadastro = diagnosticar(ENTIDADES + ACESSOS_ADICIONAIS)
 com_link = sum(url_valida(e["url"]) for e in registros)
 pendentes = len(registros) - com_link
-renderizar_indicadores(len(registros), com_link, pendentes)
 
 # ==================================================
 # 7. PESQUISA E FILTROS — FRAGMENTO RÁPIDO

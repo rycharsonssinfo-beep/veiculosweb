@@ -5,8 +5,8 @@ Central de navegação do **Grupo S&S Informática**, desenvolvida em Python e S
 ## Funcionalidades
 
 - Pesquisa por nome, município ou categoria, ignorando maiúsculas e acentos, com atualização após 250 ms sem digitar.
-- Pesquisa e filtros isolados em um `st.fragment`, mantendo o cabeçalho e os indicadores sem reconstrução desnecessária.
-- Filtros de **Prefeituras, Câmaras, Consórcios, Institutos, SAAEs e Ambientes especiais**, centralizados por um contêiner horizontal nativo do Streamlit, inclusive com quebra de linhas em telas menores.
+- Pesquisa e filtros isolados em um `st.fragment`, mantendo o cabeçalho sem reconstrução desnecessária.
+- Filtros de **Prefeituras, Câmaras, Consórcios, Institutos, SAAEs e Ambientes especiais**, centralizados por um contêiner horizontal nativo do Streamlit, com quantidades discretas e quebra de linhas em telas menores.
 - Ordenação priorizando correspondências exatas, seguidas de prefixos e correspondências parciais.
 - Visualização individual ou **agrupada por município** em grade fluida: grupos com 1 ou 2 acessos dividem a mesma linha com outros municípios, preservando os cards lado a lado e a ordem alfabética. Layout adaptável a celulares e favoritos, mantendo o botão para limpar os filtros.
 - Cards mais compactos (cinco colunas em telas largas), com município destacado na pesquisa e sem repetir a cidade quando ela já está no nome. Os botões de abrir, copiar e favoritar foram preservados.
@@ -50,7 +50,7 @@ Abra `veiculos_data.py` e localize a lista `ENTIDADES`:
 
 As categorias aceitas são **Prefeituras**, **Câmaras**, **Consórcios**, **Institutos**, **SAAEs** e **Ambientes especiais**. Cada URL precisa ser confirmada e transcrita exatamente como fornecida. Não invente endereço: use `"url": ""` quando ainda não houver link conhecido.
 
-Ao salvar, a pesquisa, os filtros e os indicadores serão atualizados automaticamente. Não adicione senhas ou tokens neste arquivo; o repositório é público.
+Ao salvar, a pesquisa, os filtros e a contagem de resultados serão atualizados automaticamente. Não adicione senhas ou tokens neste arquivo; o repositório é público.
 
 Os links adicionais fornecidos apenas por URL ficam em `ACESSOS_ADICIONAIS` e **já aparecem nos cards e na pesquisa**. Seus nomes e categorias são rótulos operacionais, marcados como "Classificação a conferir". O cadastro mantém também as entidades sem endereço, com botão desabilitado.
 
@@ -65,7 +65,7 @@ Se preferir, `streamlit run main.py` também executa a aplicação. Para a impla
 
 ## Segurança e funcionamento
 
-O painel contém **somente nomes, categorias, municípios e URLs**. Ele não executa login nos sistemas de destino e não armazena credenciais. A contagem **Com link** representa endereços cadastrados em formato válido, **não** uma verificação de disponibilidade dos servidores externos.
+O painel contém **somente nomes, categorias, municípios e URLs**. Ele não executa login nos sistemas de destino e não armazena credenciais. A interface principal não exibe cartões de indicadores cadastrais: as quantidades aparecem discretamente nos filtros e na listagem, enquanto as pendências ficam na seção expansível de conferência. A existência de um link cadastrado **não** confirma a disponibilidade do servidor externo.
 
 A cópia de link usa a API de área de transferência do navegador, que pode solicitar permissão; quando indisponível, é exibido o endereço para cópia manual.
 
