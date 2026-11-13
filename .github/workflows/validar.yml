@@ -34,6 +34,11 @@ jobs:
           assert 'st.toggle("Agrupar por município"' in codigo
           assert 'Central municipal' not in codigo
           estilo = Path('assets/painel.css').read_text(encoding='utf-8')
+          assert 'horizontal_alignment="center"' in codigo
+          assert 'key="filtros_centralizados"' in codigo
+          assert 'width="content"' in codigo
+          assert 'wrap=True' in codigo
+          assert '.st-key-filtros_centralizados' in estilo
           assert '[data-testid="stPills"]' in estilo
           print('Identidade visual e recursos: OK')
           PY

@@ -376,16 +376,25 @@ def painel_pesquisa():
         label_visibility="collapsed",
     )
     totais_por_categoria = Counter(e["categoria"] for e in registros)
-    categoria = st.pills(
-        "Categorias",
-        ["Todas"] + CATEGORIAS,
-        default="Todas",
-        required=True,
-        key="categoria_atual",
-        label_visibility="collapsed",
-        format_func=lambda c: f"{c} · {len(registros) if c == 'Todas' else totais_por_categoria[c]}",
+    # A centralização é feita pelo layout nativo do Streamlit.
+    # O widget mantém largura de conteúdo e quebra linhas em telas estreitas.
+    with st.container(
+        key="filtros_centralizados",
+        horizontal=True,
+        horizontal_alignment="center",
         wrap=True,
-    )
+    ):
+        categoria = st.pills(
+            "Categorias",
+            ["Todas"] + CATEGORIAS,
+            default="Todas",
+            required=True,
+            key="categoria_atual",
+            label_visibility="collapsed",
+            format_func=lambda c: f"{c} · {len(registros) if c == 'Todas' else totais_por_categoria[c]}",
+            width="content",
+            wrap=True,
+        )
     agrupar_col, limpar_col = st.columns([3, 1], gap="small", vertical_alignment="center")
     with agrupar_col:
         agrupar = st.toggle("Agrupar por município", value=False, key="agrupar")

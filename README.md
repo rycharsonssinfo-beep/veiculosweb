@@ -6,7 +6,7 @@ Central de navegação do **Grupo S&S Informática**, desenvolvida em Python e S
 
 - Pesquisa por nome, município ou categoria, ignorando maiúsculas e acentos, com atualização após 250 ms sem digitar.
 - Pesquisa e filtros isolados em um `st.fragment`, mantendo o cabeçalho e os indicadores sem reconstrução desnecessária.
-- Filtros de **Prefeituras, Câmaras, Consórcios, Institutos, SAAEs e Ambientes especiais**, alinhados ao centro da página.
+- Filtros de **Prefeituras, Câmaras, Consórcios, Institutos, SAAEs e Ambientes especiais**, centralizados por um contêiner horizontal nativo do Streamlit, inclusive com quebra de linhas em telas menores.
 - Ordenação priorizando correspondências exatas, seguidas de prefixos e correspondências parciais.
 - Visualização individual ou **agrupada por município** em grade fluida: grupos com 1 ou 2 acessos dividem a mesma linha com outros municípios, preservando os cards lado a lado e a ordem alfabética. Layout adaptável a celulares e favoritos, mantendo o botão para limpar os filtros.
 - Cards mais compactos (cinco colunas em telas largas), com município destacado na pesquisa e sem repetir a cidade quando ela já está no nome. Os botões de abrir, copiar e favoritar foram preservados.

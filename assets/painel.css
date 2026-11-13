@@ -148,21 +148,27 @@ div[data-testid="stTextInput"] input:focus {border-color:var(--ss-primary);box-s
   .ss-back-top {transform:none!important;}
 }
 
-/* Filtros de categorias: alinhamento central em uma ou várias linhas. */
-[data-testid="stPills"] {
-  width:100%;display:flex;justify-content:center;margin-inline:auto;
+/* O contêiner horizontal do Streamlit centraliza a largura real do widget.
+   Os ajustes internos abaixo só centralizam linhas quebradas em telas menores. */
+.st-key-filtros_centralizados {
+  width:100%;
+  justify-content:center!important;
+  align-items:center;
 }
-[data-testid="stPills"] > div {
-  display:flex;justify-content:center;align-items:center;flex-wrap:wrap;width:100%;
+.st-key-filtros_centralizados [data-testid="stPills"],
+.st-key-filtros_centralizados [data-testid="stButtonGroup"] {
+  max-width:100%;
+  margin-inline:auto;
 }
-[data-testid="stPills"] [role="radiogroup"],
-[data-testid="stPills"] [role="group"],
-[data-testid="stPills"] [data-baseweb="button-group"] {
-  display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:5px;
+.st-key-filtros_centralizados [data-testid="stPills"] > div,
+.st-key-filtros_centralizados [data-testid="stButtonGroup"] > div,
+.st-key-filtros_centralizados [role="radiogroup"] {
+  justify-content:center!important;
+  flex-wrap:wrap;
 }
 @media (max-width:560px) {
   .ss-brand {min-height:0;}
-  [data-testid="stPills"] {justify-content:center;}
+  .st-key-filtros_centralizados {justify-content:center!important;}
 }
 /* Componentes do Streamlit: mesma paleta dos cards, inclusive no Firefox. */
 [data-testid="stPills"] button,
