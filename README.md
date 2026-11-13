@@ -10,10 +10,10 @@ Central de navegação do **Grupo S&S Informática**, desenvolvida em Python e S
 - Ordenação selecionável por **Município**, **Entidade** ou **Categoria**; a pesquisa mantém a priorização dos resultados mais relevantes.
 - Visualização individual ou **agrupada por município** em grade fluida: grupos com 1 ou 2 acessos dividem a mesma linha com outros municípios, preservando os cards lado a lado e a ordem alfabética. Layout adaptável a celulares e favoritos, mantendo o botão para limpar os filtros.
 - Cards compactos (cinco colunas em telas largas), com município destacado na pesquisa e sem repetir a cidade no nome; a classificação provisória aparece apenas na Conferência cadastral.
-- **Favoritos** e **acessos recentes** em faixa horizontal compacta, restritos à aba do navegador por `sessionStorage`, sem banco de dados ou compartilhamento.
+- **Favoritos** e **acessos recentes** em faixa horizontal compacta, persistidos no mesmo navegador por `localStorage`, sem banco de dados ou sincronização entre dispositivos.
 - Atalho **Ctrl+K** (ou **Cmd+K**, onde o navegador permitir) para focar a pesquisa.
 - Botão **Voltar ao topo** após rolagem e transições curtas nos filtros e resultados, respeitando a preferência por movimento reduzido.
-- Tema claro/escuro com configuração oficial da cor turquesa nos controles nativos (`.streamlit/config.toml`), filtros harmonizados, cards uniformes, foco visível e espaçamento vertical reduzido.
+- Tema claro/escuro com configuração oficial da cor turquesa (`.streamlit/config.toml`), menus suspensos identificados, título sem corte superior, favoritos destacados, controles responsivos e espaçamento vertical otimizado.
 - Seção de conferência dos 7 registros sem link e das classificações sugeridas para os 26 acessos adicionais; os endereços são sempre pesquisáveis e abertos em nova aba.
 
 ## Quantidades iniciais (novembro de 2026)

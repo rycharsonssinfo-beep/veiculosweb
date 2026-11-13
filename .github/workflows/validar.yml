@@ -155,6 +155,24 @@ jobs:
           assert 'ss-card--favorite' in javascript
           print('Ordenação, ambientes, persistência e temas: OK')
           PY
+      - name: Verificar acabamento e responsividade
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source=Path("main.py").read_text(encoding="utf-8")
+          style=Path("assets/painel.css").read_text(encoding="utf-8")
+          assert '"Ordenar por", ["Município", "Entidade", "Categoria"]' in source
+          assert '"Tipo de ambiente", ["Todos", "Municipais", "Internos", "Treinamento"]' in source
+          assert 'key="ordenacao_atual", label_visibility="visible"' in source
+          assert 'key="tipo_ambiente_atual", label_visibility="visible"' in source
+          assert '.ss-title' in style and 'line-height:1.28' in style
+          assert 'padding:5px 0 2px!important' in style
+          assert '.ss-fav[aria-pressed="true"]' in style
+          assert '[data-testid="stSelectbox"] label' in style
+          assert '[data-testid="stHorizontalBlock"]:has(.ss-brand)' in style
+          assert '@media (max-width:420px)' in style
+          print("Rótulos, título, favoritos e mobile: OK")
+          PY
       - name: Consistência cadastral
         run: |
           python - <<'PY'

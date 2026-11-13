@@ -413,11 +413,11 @@ def painel_pesquisa():
         agrupar = st.toggle("Agrupar por município", value=False, key="agrupar")
         ordenacao = st.selectbox(
             "Ordenar por", ["Município", "Entidade", "Categoria"],
-            key="ordenacao_atual", label_visibility="collapsed", width=177,
+            key="ordenacao_atual", label_visibility="visible", width=190,
         )
         tipo = st.selectbox(
             "Tipo de ambiente", ["Todos", "Municipais", "Internos", "Treinamento"],
-            key="tipo_ambiente_atual", label_visibility="collapsed", width=170,
+            key="tipo_ambiente_atual", label_visibility="visible", width=190,
         )
         st.button("Limpar filtros", icon=":material/refresh:", key="limpar",
                   on_click=limpar_filtros, width="content")
