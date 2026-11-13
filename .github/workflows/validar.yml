@@ -189,6 +189,28 @@ jobs:
           assert '@media (max-width:420px)' in style
           print("Controles simplificados, título, favoritos e mobile: OK")
           PY
+      - name: Refinamentos exclusivos do tema claro
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          css = Path('assets/painel.css').read_text(encoding='utf-8')
+          dark = Path('assets/painel_dark.css').read_text(encoding='utf-8')
+          main = Path('main.py').read_text(encoding='utf-8')
+          assert 'filter:brightness(.90) saturate(1.10)!important' in css
+          assert '--ss-line:#c9dcd9;' in css
+          assert '--ss-shadow:0 4px 16px rgba(17,76,78,.085);' in css
+          assert 'filter:brightness(.84) saturate(1.08)' in css
+          assert 'padding:14px 0 0!important' in css
+          assert 'margin:0 auto -.35rem!important' in css
+          assert '.st-key-cabecalho_logo' in dark
+          assert 'padding:14px 0 6px!important' in dark
+          assert 'margin:0 auto!important' in dark
+          assert 'filter:none!important' in dark
+          assert 'filter:none!important' in dark.split('.ss-card-icon .ss-svg')[1]
+          assert 'CSS_BASE + CSS_TEMA' in main
+          print('Marca, espaço da divisória e cartões: tema claro refinado; escuro preservado')
+          PY
       - name: Consistência cadastral
         run: |
           python - <<'PY'

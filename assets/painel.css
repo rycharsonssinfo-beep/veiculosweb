@@ -400,3 +400,22 @@ div[data-testid="stTextInput"] [data-baseweb="base-input"] {
     margin-inline:auto!important;
   }
 }
+
+/* Tema claro: mais contraste na marca turquesa e nos cartões.
+   O PNG original não é modificado, nem se acrescenta fundo à imagem. */
+:root {
+  --ss-soft:#e5f2ef;
+  --ss-line:#c9dcd9;
+  --ss-badge-text:#1b5b5f;
+  --ss-shadow:0 4px 16px rgba(17,76,78,.085);
+}
+.st-key-cabecalho_logo {
+  padding:14px 0 0!important;
+  margin:0 auto -.35rem!important;
+}
+.st-key-cabecalho_logo [data-testid="stImage"] img {
+  filter:brightness(.90) saturate(1.10)!important;
+}
+.ss-card-icon .ss-svg {
+  filter:brightness(.84) saturate(1.08);
+}
