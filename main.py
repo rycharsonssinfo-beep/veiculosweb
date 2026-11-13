@@ -164,12 +164,11 @@ def ordem_busca(entidade, termo):
     return (prioridade, nome, municipio)
 
 
-def filtrar(itens, termo="", categoria="Todas", somente_com_link=False):
+def filtrar(itens, termo="", categoria="Todas"):
     termo = normalizar(termo).strip()
     filtrados = [
         e for e in itens
         if (categoria == "Todas" or e["categoria"] == categoria)
-        and (not somente_com_link or url_valida(e["url"]))
         and (
             not termo or termo in normalizar(" ".join(
                 (e["nome"], e["municipio"], e["categoria"], urlparse(e["url"]).path.lstrip("/"))
@@ -286,7 +285,6 @@ def renderizar_lista(lista, agrupar=False):
 def limpar_filtros():
     st.session_state["busca"] = ""
     st.session_state["categoria_atual"] = "Todas"
-    st.session_state["somente_link"] = False
     st.session_state["agrupar"] = False
 
 
@@ -303,7 +301,6 @@ with marca:
 with titulo:
     st.html("""<header class="ss-brand">
       <h1 class="ss-title">Painel de Acessos</h1>
-      <p class="ss-subtitle">Veículos Web</p>
       <p class="ss-description">Localize a entidade e abra seu ambiente de trabalho.</p>
     </header>""")
 st.html('<div class="ss-rule" aria-hidden="true"></div>')
@@ -343,14 +340,12 @@ def painel_pesquisa():
         format_func=lambda c: f"{c} · {len(registros) if c == 'Todas' else totais_por_categoria[c]}",
         wrap=True,
     )
-    left, mid, right = st.columns([1.45, 1.45, 1], gap="small", vertical_alignment="center")
-    with left:
-        somente_com_link = st.toggle("Somente com link", value=False, key="somente_link")
-    with mid:
+    agrupar_col, limpar_col = st.columns([3, 1], gap="small", vertical_alignment="center")
+    with agrupar_col:
         agrupar = st.toggle("Agrupar por município", value=False, key="agrupar")
-    with right:
+    with limpar_col:
         st.button("Limpar filtros", icon=":material/refresh:", key="limpar", on_click=limpar_filtros, use_container_width=True)
-    lista = filtrar(registros, pesquisa, categoria or "Todas", somente_com_link)
+    lista = filtrar(registros, pesquisa, categoria or "Todas")
     st.html(
         '<div class="ss-section-head"><h2>Entidades e ambientes</h2></div>'
     )

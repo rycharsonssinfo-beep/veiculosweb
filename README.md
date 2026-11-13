@@ -6,9 +6,9 @@ Central de navegação do **Grupo S&S Informática**, desenvolvida em Python e S
 
 - Pesquisa por nome, município ou categoria, ignorando maiúsculas e acentos, com atualização após 250 ms sem digitar.
 - Pesquisa e filtros isolados em um `st.fragment`, mantendo o cabeçalho e os indicadores sem reconstrução desnecessária.
-- Filtros de **Prefeituras, Câmaras, Consórcios, Institutos, SAAEs e Ambientes especiais**; opção **Somente com link**.
+- Filtros de **Prefeituras, Câmaras, Consórcios, Institutos, SAAEs e Ambientes especiais**, alinhados ao centro da página.
 - Ordenação priorizando correspondências exatas, seguidas de prefixos e correspondências parciais.
-- Visualização individual ou **agrupada por município**.
+- Visualização individual ou **agrupada por município**, mantendo o botão para limpar os filtros.
 - Cards compactos com botões para abrir o endereço original em outra aba, copiar o link e marcar favoritos.
 - **Favoritos** e **abertos recentemente** restritos à aba do navegador. Utilizam `sessionStorage`, sem banco de dados nem compartilhamento entre usuários. Ao encerrar a aba, os dados poderão ser descartados pelo navegador.
 - Atalho **Ctrl+K** (ou **Cmd+K**, onde o navegador permitir) para focar a pesquisa.
@@ -76,4 +76,4 @@ Os commits verificam automaticamente sintaxe, duplicidade de nomes ou endereços
 
 ## Identidade visual e navegadores
 
-O cabeçalho usa a marca transparente **VeículosWeb** e o subtítulo **Veículos Web**. As cores dos controles nativos são padronizadas por CSS para reduzir discrepâncias entre Firefox e Chrome, inclusive quando cada navegador usa configuração de tema diferente. O modo escuro do Streamlit continua disponível.
+O cabeçalho usa a marca transparente **VeículosWeb**, o título **Painel de Acessos** e uma descrição curta sem repetir o nome da marca. As cores dos controles nativos são padronizadas por CSS para reduzir discrepâncias entre Firefox e Chrome, inclusive quando cada navegador usa configuração de tema diferente. O modo escuro do Streamlit continua disponível.

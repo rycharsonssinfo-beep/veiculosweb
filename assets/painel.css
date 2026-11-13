@@ -10,11 +10,10 @@ html,body,[data-testid="stAppViewContainer"] {background:var(--ss-bg)!important;
 [data-testid="stHeader"] {background:var(--ss-bg)!important;}
 .block-container {max-width:1440px;padding-top:3.5rem;padding-bottom:2rem;}
 #MainMenu,footer:not(.ss-footer) {visibility:hidden;}
-.ss-brand {padding:.25rem 0 .35rem;overflow:visible;}
+.ss-brand {display:flex;flex-direction:column;justify-content:center;min-height:84px;padding:.25rem 0;overflow:visible;}
 .ss-kicker {text-transform:uppercase;letter-spacing:.14em;color:#007679;font-size:.72rem;font-weight:800;}
-.ss-title {font-size:clamp(1.75rem,3vw,2.55rem);font-weight:800;letter-spacing:-.045em;color:var(--ss-text);line-height:1.2;margin:4px 0 5px;padding:0!important;}
-.ss-subtitle {font-size:.99rem;font-weight:650;color:var(--ss-primary);margin:0;}
-.ss-description {font-size:.88rem;color:var(--ss-muted);margin:7px 0 0;}
+.ss-title {font-size:clamp(1.75rem,3vw,2.55rem);font-weight:800;letter-spacing:-.045em;color:var(--ss-text);line-height:1.2;margin:0 0 9px;padding:0!important;}
+.ss-description {font-size:.88rem;color:var(--ss-muted);margin:0;line-height:1.5;}
 .ss-rule {height:1px;background:var(--ss-line);margin:12px 0 16px;}
 .ss-metrics {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:20px;}
 .ss-metric {display:flex;align-items:center;gap:13px;background:var(--ss-surface);border:1px solid var(--ss-line);border-radius:14px;padding:15px 18px;box-shadow:var(--ss-shadow);min-width:0;}
@@ -86,6 +85,22 @@ div[data-testid="stTextInput"] input:focus {border-color:var(--ss-primary);box-s
 }
 @media (prefers-reduced-motion:reduce) {.ss-card {transition:none;}.ss-card:hover {transform:none;}}
 
+/* Filtros de categorias: alinhamento central em uma ou várias linhas. */
+[data-testid="stPills"] {
+  width:100%;display:flex;justify-content:center;margin-inline:auto;
+}
+[data-testid="stPills"] > div {
+  display:flex;justify-content:center;align-items:center;flex-wrap:wrap;width:100%;
+}
+[data-testid="stPills"] [role="radiogroup"],
+[data-testid="stPills"] [role="group"],
+[data-testid="stPills"] [data-baseweb="button-group"] {
+  display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:5px;
+}
+@media (max-width:560px) {
+  .ss-brand {min-height:0;}
+  [data-testid="stPills"] {justify-content:center;}
+}
 /* Componentes do Streamlit: mesma paleta dos cards, inclusive no Firefox. */
 [data-testid="stPills"] button,
 button[data-testid="stBaseButton-pills"] {
