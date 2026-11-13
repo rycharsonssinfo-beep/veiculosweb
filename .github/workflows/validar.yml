@@ -27,11 +27,20 @@ jobs:
               assert imagem.startswith(b'\x89PNG\r\n\x1a\n'), f'{nome}: não é PNG'
               assert b'tRNS' in imagem or b'RGBA' in imagem, f'{nome}: sem transparência'
               assert len(imagem) > 10000, f'{nome}: arquivo muito pequeno'
+          import xml.etree.ElementTree as ET
+          for nome in ('logo-painel-dark-vector.svg', 'logo-painel-light-vector.svg'):
+              svg = (Path('assets') / nome).read_text(encoding='utf-8')
+              root = ET.fromstring(svg)
+              assert root.tag == '{http://www.w3.org/2000/svg}svg', nome
+              assert 'viewBox' in root.attrib
+              assert 'VeículosWeb' in svg and 'Painel de Acessos' in svg
+              assert '<script' not in svg and 'href=' not in svg
+              assert 'font-family="Inter, Arial, sans-serif"' in svg
           for arquivo in ('assets/painel.css', 'assets/painel_dark.css', 'assets/interacoes.js', 'veiculos_data.py'):
               assert Path(arquivo).is_file(), arquivo
           codigo = Path('main.py').read_text(encoding='utf-8')
           assert 'key="cabecalho_logo"' in codigo
-          assert '"logo-painel-dark.png" if TEMA_ESCURO else "logo-painel-light.png"' in codigo
+          assert '"logo-painel-dark-vector.svg" if TEMA_ESCURO else "logo-painel-light-vector.svg"' in codigo
           assert 'st.image(str(logo_path), width=646)' in codigo
           assert '<h1 class="ss-title">Painel de Acessos</h1>' not in codigo
           assert 'Localize a entidade e abra seu ambiente de trabalho.' not in codigo
@@ -197,7 +206,8 @@ jobs:
           css = Path('assets/painel.css').read_text(encoding='utf-8')
           dark = Path('assets/painel_dark.css').read_text(encoding='utf-8')
           main = Path('main.py').read_text(encoding='utf-8')
-          assert 'filter:brightness(.90) saturate(1.10)!important' in css
+          assert 'image-rendering:auto!important' in css
+          assert 'filter:brightness(.90) saturate(1.10)!important' not in css
           assert '--ss-line:#c9dcd9;' in css
           assert '--ss-shadow:0 4px 16px rgba(17,76,78,.085);' in css
           assert 'filter:brightness(.84) saturate(1.08)' in css

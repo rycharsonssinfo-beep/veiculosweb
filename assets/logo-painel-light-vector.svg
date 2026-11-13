@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="315" viewBox="0 0 1500 315" role="img" aria-labelledby="title desc">
+<title id="title">VeículosWeb — Painel de Acessos</title>
+<desc id="desc">Símbolo de um veículo com ferramentas, seguido dos textos VeículosWeb e Painel de Acessos.</desc>
+<defs>
+ <linearGradient id="line" x1="0" x2="1" y1="1" y2="0"><stop offset="0" stop-color="#00B9B8"/><stop offset=".65" stop-color="#00CFCD"/><stop offset="1" stop-color="#21E0DB"/></linearGradient>
+ <linearGradient id="badge" x1="0" x2=".95" y1="0" y2="1"><stop offset="0" stop-color="#0BCAC7"/><stop offset="1" stop-color="#006C70"/></linearGradient>
+ <linearGradient id="titlefill" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#00777A"/><stop offset=".55" stop-color="#009E9F"/><stop offset="1" stop-color="#00CFCF"/></linearGradient>
+ <radialGradient id="ground"><stop offset="0" stop-color="#00CFCB" stop-opacity=".26"/><stop offset="1" stop-color="#00CFCB" stop-opacity="0"/></radialGradient>
+</defs>
+<g stroke-linecap="round" stroke-linejoin="round">
+ <ellipse cx="211" cy="282" rx="172" ry="19" fill="url(#ground)"/>
+ <path d="M74 238 Q52 237 52 215 V173 Q52 154 73 154 H88 Q104 154 113 141 L142 104 Q157 84 181 84 H253 Q273 84 287 99 L332 146 Q341 157 356 161 L384 170 Q399 175 399 190 V214 Q399 237 376 238" stroke="url(#line)" stroke-width="16" fill="none"/>
+ <path d="M153 100 H248 Q265 100 280 115 L314 147 H117 L145 109 Q150 102 153 100 Z" stroke="url(#line)" stroke-width="11" fill="none"/>
+ <path d="M230 106 V146" stroke="url(#line)" stroke-width="10"/>
+ <path d="M152 173 H244" stroke="#00B6B5" stroke-width="10"/>
+ <path d="M392 184 L372 178" stroke="#00BCBA" stroke-width="9"/>
+ <path d="M160 238 H283" stroke="#008C8E" stroke-width="8" opacity=".7"/>
+ <circle cx="128" cy="237" r="34" fill="none" stroke="url(#line)" stroke-width="17"/>
+ <circle cx="318" cy="237" r="34" fill="none" stroke="url(#line)" stroke-width="17"/>
+ <circle cx="105" cy="91" r="54" fill="url(#badge)" stroke="#008487" stroke-width="4"/>
+ <g transform="translate(105 91)" stroke="#F9FFFF" fill="none" stroke-width="10">
+  <path d="M-31 28 L16 -19"/>
+  <path d="M14 -31 Q26 -39 36 -28 L25 -17 L29 -8 Q17 1 8 -12" stroke-width="9"/>
+  <path d="M-24 -29 L27 25"/>
+  <path d="M-30 -36 L-13 -25 L-22 -13 L-36 -29" stroke-width="8"/>
+  <path d="M23 23 L33 33" stroke-width="8"/>
+ </g>
+</g>
+<rect x="442" y="46" width="8" height="224" rx="4" fill="#00BDBB"/>
+<text x="487" y="155" fill="url(#titlefill)" font-family="Inter, Arial, sans-serif" font-weight="800" font-size="124" letter-spacing="-4">VeículosWeb</text>
+<text x="489" y="264" fill="#163D40" font-family="Inter, Arial, sans-serif" font-weight="800" font-size="100" letter-spacing="-3.5">Painel de Acessos</text>
+</svg>

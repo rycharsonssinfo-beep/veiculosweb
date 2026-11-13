@@ -414,7 +414,8 @@ div[data-testid="stTextInput"] [data-baseweb="base-input"] {
   margin:0 auto -.35rem!important;
 }
 .st-key-cabecalho_logo [data-testid="stImage"] img {
-  filter:brightness(.90) saturate(1.10)!important;
+  filter:none!important;
+  image-rendering:auto!important;
 }
 .ss-card-icon .ss-svg {
   filter:brightness(.84) saturate(1.08);

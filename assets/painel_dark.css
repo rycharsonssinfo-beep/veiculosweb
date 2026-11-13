@@ -17,8 +17,7 @@
 .ss-card--favorite {box-shadow:0 0 0 1px rgba(69,208,204,.25);}
 .ss-copy-feedback {background:#d7f6f3;color:#10373b;}
 
-/* Restaura o desenho original do modo escuro.
-   As melhorias de contraste e espaçamento acima são exclusivas do modo claro. */
+/* Preserva a imagem vetorial e os espaçamentos anteriores do modo escuro. */
 .st-key-cabecalho_logo {
   padding:14px 0 6px!important;
   margin:0 auto!important;

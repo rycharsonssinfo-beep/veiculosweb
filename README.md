@@ -29,7 +29,8 @@ Central de navegação do **Grupo S&S Informática**, desenvolvida em Python e S
 - `veiculos_data.py` — cadastro de entidades, URLs e categorias; edite este arquivo para incluir municípios.
 - `assets/painel.css` e `assets/painel_dark.css` — identidade visual e ajustes de tema.
 - `assets/interacoes.js` — favoritos, histórico, cópia de endereços e atalhos.
-- `assets/logo-painel-dark.png` e `assets/logo-painel-light.png` — logomarca unificada **VeículosWeb · Painel de Acessos**, centralizada e transparente, em duas variantes para garantir contraste nos modos escuro e claro.
+- `assets/logo-painel-dark-vector.svg` e `assets/logo-painel-light-vector.svg` — logomarca **VeículosWeb · Painel de Acessos**, redesenhada em SVG para eliminar serrilhados e granulação, mantendo transparência e contraste em ambos os temas.
+- `assets/logo-painel-dark.png` e `assets/logo-painel-light.png` — versões PNG anteriores preservadas como backup.
 - `assets/veiculosweb.png` — versão histórica anterior, mantida para eventual reversão.
 - `Grupo-SS.png` — arquivo histórico da logomarca anterior, mantido como referência (não utilizado no cabeçalho).
 - `requirements.txt` — versão do Streamlit.
@@ -78,7 +79,7 @@ Os commits verificam automaticamente sintaxe, duplicidade de nomes ou endereços
 
 ## Identidade visual e navegadores
 
-O cabeçalho utiliza exclusivamente a logomarca completa **VeículosWeb — Painel de Acessos**, centralizada em 646 px no desktop, com margem de segurança superior para evitar corte e largura responsiva em celulares. No modo claro, uma correção CSS leve escurece os detalhes turquesa da imagem sem alterar o PNG original e diminui o espaço até a divisória; bordas e ícones dos cards recebem contraste adicional. O modo escuro preserva seu espaçamento e suas cores anteriores. Os menus de ordenação e tipo de ambiente foram removidos; a lista mantém ordenação automática por município e filtros de categoria. O título e a descrição HTML independentes permanecem removidos. O PNG foi recortado para evitar espaços transparentes excessivos. No tema claro, a segunda linha ganha uma cor mais escura para preservar a legibilidade. As cores dos controles nativos são padronizadas por CSS para reduzir discrepâncias entre Firefox e Chrome, inclusive quando cada navegador usa configuração de tema diferente. O modo escuro do Streamlit continua disponível.
+O cabeçalho utiliza exclusivamente a logomarca completa **VeículosWeb — Painel de Acessos**, centralizada em 646 px no desktop, com margem de segurança superior para evitar corte e largura responsiva em celulares. No modo claro, a logo SVG utiliza texto inferior em verde-petróleo; no escuro, texto branco. As imagens são vetoriais e não dependem de filtros artificiais de brilho ou nitidez. O espaço até a divisória permanece compacto; bordas e ícones dos cards mantêm o contraste atualizado. O modo escuro preserva seu espaçamento e suas cores anteriores. Os menus de ordenação e tipo de ambiente foram removidos; a lista mantém ordenação automática por município e filtros de categoria. O título e a descrição HTML independentes permanecem removidos. O PNG foi recortado para evitar espaços transparentes excessivos. No tema claro, a segunda linha ganha uma cor mais escura para preservar a legibilidade. As cores dos controles nativos são padronizadas por CSS para reduzir discrepâncias entre Firefox e Chrome, inclusive quando cada navegador usa configuração de tema diferente. O modo escuro do Streamlit continua disponível.
 
 ## Preferências e privacidade
 

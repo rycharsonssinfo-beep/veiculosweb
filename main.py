@@ -325,9 +325,9 @@ def limpar_filtros():
 # 6. CABEÇALHO COMPACTO (RENDERIZAÇÃO ESTÁTICA)
 # ==================================================
 # A logomarca completa substitui imagem, título e descrição separados.
-# Há uma variante de contraste para cada tema, ambas com transparência.
+# Há uma variante vetorial para cada tema, ambas com transparência.
 logo_path = PASTA_ASSETS / (
-    "logo-painel-dark.png" if TEMA_ESCURO else "logo-painel-light.png"
+    "logo-painel-dark-vector.svg" if TEMA_ESCURO else "logo-painel-light-vector.svg"
 )
 with st.container(
     key="cabecalho_logo",
