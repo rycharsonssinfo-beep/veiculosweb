@@ -109,8 +109,51 @@ jobs:
           assert 'stBaseButton-pillsActive' in style
           assert 'st-key-controles_navegacao' in style
           assert 'brightness(1.45)' in dark
-          assert "items.length ? 'flex':'none'" in javascript
+          assert "bar.style.display=items.length?'flex':'none'" in javascript
           print('Ordenação e apresentação: OK')
+          PY
+      - name: Novos filtros, preferências e cores
+        run: |
+          python - <<'PY'
+          import ast, unicodedata
+          from pathlib import Path
+          from urllib.parse import urlparse
+          source=Path('main.py').read_text(encoding='utf-8')
+          tree=ast.parse(source)
+          names=('normalizar','tipo_ambiente','ordem_busca','filtrar')
+          funcs=[node for node in tree.body if isinstance(node,ast.FunctionDef) and node.name in names]
+          assert len(funcs)==4
+          ctx={'unicodedata':unicodedata,'urlparse':urlparse}
+          exec(compile(ast.Module(body=funcs,type_ignores=[]),'filters','exec'),ctx)
+          data=[
+              dict(nome='Câmara de Caucaia',municipio='Caucaia',categoria='Câmaras',url=''),
+              dict(nome='Prefeitura de Acaraú',municipio='Acaraú',categoria='Prefeituras',url=''),
+              dict(nome='Câmara de Acaraú',municipio='Acaraú',categoria='Câmaras',url=''),
+              dict(nome='Treinamento',municipio='Grupo S&S',categoria='Ambientes especiais',url='https://ssveiculos.ssinformatica.net/Treinamento'),
+              dict(nome='SS Informática',municipio='Grupo S&S',categoria='Ambientes especiais',url='https://ssveiculos.ssinformatica.net/SSInformatica')
+          ]
+          assert ctx['tipo_ambiente'](data[3])=='Treinamento'
+          assert ctx['tipo_ambiente'](data[4])=='Internos'
+          assert ctx['tipo_ambiente'](data[0])=='Municipais'
+          assert len(ctx['filtrar'](data,tipo='Municipais'))==3
+          assert len(ctx['filtrar'](data,tipo='Internos'))==1
+          assert len(ctx['filtrar'](data,tipo='Treinamento'))==1
+          assert ctx['filtrar'](data,ordenacao='Município')[0]['municipio']=='Acaraú'
+          assert ctx['filtrar'](data,ordenacao='Entidade')[0]['nome']=='Câmara de Acaraú'
+          assert ctx['filtrar'](data,ordenacao='Categoria')[0]['categoria']=='Ambientes especiais'
+          assert ctx['filtrar'](data,termo='caucaia')[0]['municipio']=='Caucaia'
+          assert 'key="ordenacao_atual"' in source
+          assert 'key="tipo_ambiente_atual"' in source
+          assert 'ss-empty--search' in source
+          assert 'ss-copy-feedback' in source
+          config=Path('.streamlit/config.toml').read_text(encoding='utf-8')
+          assert '[theme.light]' in config and '[theme.dark]' in config
+          assert 'primaryColor' in config
+          javascript=Path('assets/interacoes.js').read_text(encoding='utf-8')
+          assert 'localStorage.setItem' in javascript and 'sessionStorage.getItem' in javascript
+          assert "showCopyFeedback(control)" in javascript
+          assert 'ss-card--favorite' in javascript
+          print('Ordenação, ambientes, persistência e temas: OK')
           PY
       - name: Consistência cadastral
         run: |

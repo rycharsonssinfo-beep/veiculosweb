@@ -1,0 +1,7 @@
+# Cores institucionais dos controles nativos do Streamlit.
+# Preserva a alternância entre tema claro e escuro.
+[theme.light]
+primaryColor = "#007c80"
+
+[theme.dark]
+primaryColor = "#2ac4c2"

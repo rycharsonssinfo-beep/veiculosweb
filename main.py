@@ -148,34 +148,54 @@ def svg_icone(categoria):
     )
 
 
-def ordem_busca(entidade, termo):
-    """Correspondência exata, início de palavra e por fim ocorrências gerais."""
-    nome, municipio = normalizar(entidade["nome"]), normalizar(entidade["municipio"])
+def tipo_ambiente(entidade):
+    """Ambiente operacional: municipais, internos ou treinamento."""
+    caminho = normalizar(urlparse(entidade.get("url", "")).path.lstrip("/"))
+    nome = normalizar(entidade["nome"])
+    if caminho == "treinamento" or "treinamento" in nome:
+        return "Treinamento"
+    if entidade["categoria"] == "Ambientes especiais":
+        return "Internos"
+    return "Municipais"
+
+
+def ordem_busca(entidade, termo, ordenacao="Município"):
+    """Prioriza relevância na busca e utiliza o critério escolhido para desempatar."""
+    nome = normalizar(entidade["nome"])
+    municipio = normalizar(entidade["municipio"])
+    categoria = normalizar(entidade["categoria"])
     if not termo:
         prioridade = 0
     elif termo in (nome, municipio):
         prioridade = 0
     elif nome.startswith(termo) or municipio.startswith(termo):
         prioridade = 1
-    elif any(p.startswith(termo) for p in nome.split() + municipio.split()):
+    elif any(parte.startswith(termo) for parte in nome.split() + municipio.split()):
         prioridade = 2
     else:
         prioridade = 3
-    return (prioridade, municipio, nome)
+    if ordenacao == "Entidade":
+        criterios = (nome, municipio, categoria)
+    elif ordenacao == "Categoria":
+        criterios = (categoria, municipio, nome)
+    else:
+        criterios = (municipio, nome, categoria)
+    return (prioridade, *criterios)
 
 
-def filtrar(itens, termo="", categoria="Todas"):
+def filtrar(itens, termo="", categoria="Todas", tipo="Todos", ordenacao="Município"):
     termo = normalizar(termo).strip()
     filtrados = [
         e for e in itens
         if (categoria == "Todas" or e["categoria"] == categoria)
+        and (tipo == "Todos" or tipo_ambiente(e) == tipo)
         and (
             not termo or termo in normalizar(" ".join(
                 (e["nome"], e["municipio"], e["categoria"], urlparse(e["url"]).path.lstrip("/"))
             ))
         )
     ]
-    return sorted(filtrados, key=lambda e: ordem_busca(e, termo))
+    return sorted(filtrados, key=lambda e: ordem_busca(e, termo, ordenacao))
 
 
 def destacar_termo(texto, termo):
@@ -224,6 +244,7 @@ def criar_card(entidade, termo=""):
             + '<button type="button" class="ss-copy" data-action="copy" '
             + 'data-url="' + destino + '" title="Copiar link" aria-label="Copiar link de '
             + nome + '">' + svg_icone("Copiar") + '</button>'
+            + '<span class="ss-copy-feedback" role="status" aria-live="polite"></span>'
         )
         status = ""
     else:
@@ -251,7 +272,7 @@ def criar_card(entidade, termo=""):
 INTERACOES_JS = "<script>\n" + (PASTA_ASSETS / "interacoes.js").read_text(encoding="utf-8") + "\n</script>"
 
 
-def renderizar_lista(lista, agrupar=False, termo=""):
+def renderizar_lista(lista, agrupar=False, termo="", tipo="Todos", ordenacao="Município"):
     busca = termo.strip()[:80]
     busca_segura = escape(busca, quote=True)
     palavra = "resultado" if len(lista) == 1 else "resultados"
@@ -260,17 +281,19 @@ def renderizar_lista(lista, agrupar=False, termo=""):
         if busca
         else f'{len(lista)} entidades exibidas'
     )
-    partes = [f'<div id="ss-directory" class="ss-directory" data-search-label="{busca_segura}">']
+    tipo_attr = escape(tipo, quote=True)
+    partes = [f'<div id="ss-directory" class="ss-directory" data-search-label="{busca_segura}" data-type-label="{tipo_attr}">']
     partes.append(
-        '<div class="ss-toolbar"><span class="ss-results-meta" '
-        'data-result-count aria-live="polite">'
-        + contador + '</span>'
+        '<div class="ss-toolbar">'
+        '<div class="ss-toolbar-heading"><h2>Entidades e ambientes</h2>'
+        '<span class="ss-results-meta" data-result-count aria-live="polite">'
+        + contador + '</span></div>'
         + '<button type="button" data-action="favorites-filter" '
         'class="ss-fav-filter" aria-pressed="false">☆ Meus favoritos</button></div>'
     )
     partes.append(
         '<nav class="ss-recent" aria-label="Sistemas abertos recentemente">'
-        '<div class="ss-recent-label">Recentes</div>'
+        '<span class="ss-recent-label">Recentes</span>'
         '<div class="ss-recent-links"></div></nav>'
     )
     if agrupar:
@@ -280,7 +303,8 @@ def renderizar_lista(lista, agrupar=False, termo=""):
         # Cada grupo ocupa apenas as colunas necessárias, sem desperdiçar
         # a largura inteira em municípios com um ou dois registros.
         partes.append('<div class="ss-groups-layout" aria-label="Entidades agrupadas por município">')
-        for cidade in sorted(grupos, key=normalizar):
+        # A ordem dos grupos acompanha a ordenação escolhida na lista filtrada.
+        for cidade in dict.fromkeys(e["municipio"] for e in lista):
             itens = grupos[cidade]
             tamanho = min(len(itens), 5)
             partes.append(
@@ -299,7 +323,8 @@ def renderizar_lista(lista, agrupar=False, termo=""):
         partes.append('</section>')
     partes.append(
         '<div class="ss-empty ss-hidden" data-fav-empty>'
-        'Nenhuma entidade favoritada nesta seleção.</div>'
+        '<strong>Não há favoritos nesta seleção.</strong>'
+        '<span>Marque a estrela de um acesso para encontrá-lo aqui.</span></div>'
         '<button type="button" class="ss-back-top" data-action="back-top" '
         'aria-label="Voltar ao topo" aria-hidden="true" tabindex="-1" title="Voltar ao topo">'
         '<span aria-hidden="true">↑</span><span>Topo</span></button>'
@@ -313,16 +338,18 @@ def limpar_filtros():
     st.session_state["busca"] = ""
     st.session_state["categoria_atual"] = "Todas"
     st.session_state["agrupar"] = False
+    st.session_state["tipo_ambiente_atual"] = "Todos"
+    st.session_state["ordenacao_atual"] = "Município"
 
 
 # ==================================================
 # 6. CABEÇALHO COMPACTO (RENDERIZAÇÃO ESTÁTICA)
 # ==================================================
 logo_path = PASTA_ASSETS / "veiculosweb.png"
-marca, titulo = st.columns([1.75, 4.9], gap="medium", vertical_alignment="center")
+marca, titulo = st.columns([1.5, 5.25], gap="small", vertical_alignment="center")
 with marca:
     if logo_path.is_file():
-        st.image(str(logo_path), width=285)
+        st.image(str(logo_path), width=262)
     else:
         st.markdown("**Veículos Web**")
 with titulo:
@@ -384,17 +411,30 @@ def painel_pesquisa():
         wrap=True,
     ):
         agrupar = st.toggle("Agrupar por município", value=False, key="agrupar")
+        ordenacao = st.selectbox(
+            "Ordenar por", ["Município", "Entidade", "Categoria"],
+            key="ordenacao_atual", label_visibility="collapsed", width=177,
+        )
+        tipo = st.selectbox(
+            "Tipo de ambiente", ["Todos", "Municipais", "Internos", "Treinamento"],
+            key="tipo_ambiente_atual", label_visibility="collapsed", width=170,
+        )
         st.button("Limpar filtros", icon=":material/refresh:", key="limpar",
                   on_click=limpar_filtros, width="content")
-    lista = filtrar(registros, pesquisa, categoria or "Todas")
-    st.html(
-        '<div class="ss-section-head"><h2>Entidades e ambientes</h2></div>'
-    )
+    lista = filtrar(registros, pesquisa, categoria or "Todas", tipo, ordenacao)
+    # A barra da listagem reúne título, contagem, favoritos e recentes.
+    renderizar_lista(lista, agrupar=agrupar, termo=pesquisa, tipo=tipo, ordenacao=ordenacao)
     if not lista:
-        st.html('<div class="ss-empty" role="status">Nenhuma entidade encontrada. Tente outro nome ou remova os filtros.</div>')
-    # Sempre renderiza o histórico, mesmo que a pesquisa não tenha resultados.
-    renderizar_lista(lista, agrupar=agrupar, termo=pesquisa)
-    st.html('<p class="ss-accessibility-note">Favoritos e recentes ficam somente nesta aba do navegador.</p>')
+        criterio = f' para “{escape(pesquisa)}”' if pesquisa else ''
+        st.html(
+            '<div class="ss-empty ss-empty--search" role="status">'
+            '<strong>Nenhum acesso encontrado' + criterio + '.</strong>'
+            '<span>Tente outro município ou revise a categoria e o tipo de ambiente.</span>'
+            '</div>'
+        )
+        st.button("Mostrar todos os acessos", key="limpar_sem_resultados",
+                  icon=":material/filter_alt_off:", on_click=limpar_filtros)
+    st.html('<p class="ss-accessibility-note">Favoritos e recentes são salvos somente neste navegador. Não há sincronização entre dispositivos.</p>')
 
 
 painel_pesquisa()

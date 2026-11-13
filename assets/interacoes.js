@@ -1,156 +1,215 @@
 (() => {
   'use strict';
-  const roots = document.querySelectorAll('#ss-directory');
-  const root = roots.length ? roots[roots.length - 1] : null;
-  if (!root || root.dataset.initialized === '1') return;
-  root.dataset.initialized = '1';
-  const keys = {fav:'ss-veiculos:favs:v2',recent:'ss-veiculos:recent:v2',only:'ss-veiculos:only-favs:v2'};
-  const memory = window.__ssVeiculosMemory || (window.__ssVeiculosMemory={});
-  const read = (key, fallback) => {
-    try { const raw = window.sessionStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
-    catch (e) { return key in memory ? memory[key] : fallback; }
+  const roots=document.querySelectorAll('#ss-directory');
+  const root=roots.length?roots[roots.length-1]:null;
+  if(!root || root.dataset.initialized==='1') return;
+  root.dataset.initialized='1';
+  const keys={
+    fav:'ss-veiculos:favs:v3',recent:'ss-veiculos:recent:v3',
+    oldFav:'ss-veiculos:favs:v2',oldRecent:'ss-veiculos:recent:v2',
+    only:'ss-veiculos:only-favs:v2'
   };
-  const save = (key, value) => {
-    memory[key] = value;
-    try { window.sessionStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
-  };
-  const getFavorites = () => new Set(read(keys.fav, []));
-  const cardList = () => Array.from(root.querySelectorAll('.ss-card'));
-  let onlyFavorites = Boolean(read(keys.only, false));
-  const toast = root.querySelector('.ss-toast');
-  const notify = (message) => {
-    toast.textContent = message; toast.style.display='block';
-    clearTimeout(root.__ssToastTimeout);
-    root.__ssToastTimeout = setTimeout(() => {toast.style.display='none'}, 2400);
-  };
-  function refreshFavorites() {
-    const favorites = getFavorites();
-    const toggle = root.querySelector('[data-action="favorites-filter"]');
-    toggle.setAttribute('aria-pressed', String(onlyFavorites));
-    toggle.textContent = (onlyFavorites ? '★ Exibir todas' : '☆ Meus favoritos') + ' ('+favorites.size+')';
-    let visible = 0;
-    cardList().forEach(card => {
-      const selected = favorites.has(card.dataset.key);
-      const button = card.querySelector('[data-action="favorite"]');
-      if (button) {
-        button.textContent = selected ? '★' : '☆';
-        button.setAttribute('aria-pressed', String(selected));
-        button.setAttribute('aria-label', (selected?'Remover dos favoritos: ':'Favoritar: ')+card.querySelector('.ss-card-title').textContent);
-        button.title = selected?'Remover favorito':'Favoritar';
-      }
-      const hide = onlyFavorites && !selected;
-      card.classList.toggle('ss-hidden',hide);
-      if (!hide) visible++;
-    });
-    root.querySelectorAll('.ss-group').forEach(group => {
-      const visibleCount = group.querySelectorAll('.ss-card:not(.ss-hidden)').length;
-      group.classList.toggle('ss-hidden', visibleCount===0);
-      // No modo favoritos, um município com um único card visível
-      // deixa de reservar duas ou mais colunas na grade.
-      const slots = Math.max(1, Math.min(visibleCount,5));
-      for (let i=1;i<=5;i++) group.classList.toggle('ss-group--size-'+i,i===slots);
-      const counter = group.querySelector('.ss-group-title small');
-      if (counter) counter.textContent='('+visibleCount+' '+(visibleCount===1?'entidade':'entidades')+')';
-    });
-    const empty = root.querySelector('[data-fav-empty]');
-    if (empty) empty.classList.toggle('ss-hidden', visible > 0);
-    const count = root.querySelector('[data-result-count]');
-    if (count) {
-      const label = root.dataset.searchLabel || '';
-      count.textContent = label
-        ? visible+' '+(visible===1?'resultado':'resultados')+' para “'+label+'”'
-        : visible+' '+(visible===1?'entidade exibida':'entidades exibidas');
+  const memory=window.__ssVeiculosMemory||(window.__ssVeiculosMemory={});
+  const json=(s,fallback)=>{try {return s===null?fallback:JSON.parse(s);}catch(e){return fallback;}};
+  function readLocal(key,oldKey,fallback){
+    try {
+      const current=localStorage.getItem(key);
+      if(current!==null) return json(current,fallback);
+    }catch(e){}
+    let old=null;
+    try {old=sessionStorage.getItem(oldKey);}catch(e){}
+    if(old!==null){
+      const value=json(old,fallback);
+      saveLocal(key,value);
+      return value;
     }
+    return key in memory?memory[key]:fallback;
   }
-  function recordAccess(name,url,key) {
-    if (!url || !url.startsWith('https://ssveiculos.ssinformatica.net/')) return;
-    const previous = read(keys.recent, []);
-    const history = [{name,url,key},...previous.filter(item => item.key !== key)].slice(0,6);
-    save(keys.recent,history);
+  function saveLocal(key,value){
+    memory[key]=value;
+    try {localStorage.setItem(key,JSON.stringify(value));}
+    catch(e){try{sessionStorage.setItem(key,JSON.stringify(value));}catch(e2){}}
+  }
+  function readTab(key,fallback){
+    try{return json(sessionStorage.getItem(key),fallback);}
+    catch(e){return key in memory?memory[key]:fallback;}
+  }
+  function saveTab(key,value){
+    memory[key]=value;
+    try{sessionStorage.setItem(key,JSON.stringify(value));}catch(e){}
+  }
+  const validUrl=url=>{
+    if(typeof url!=='string')return false;
+    try{
+      const u=new URL(url);
+      return u.protocol==='https:' && u.hostname==='ssveiculos.ssinformatica.net'
+        && !u.port && u.pathname!=='/' && !u.username && !u.password;
+    }catch(e){return false;}
+  };
+  const favorites=()=>new Set(
+    (Array.isArray(readLocal(keys.fav,keys.oldFav,[]))?readLocal(keys.fav,keys.oldFav,[]):[])
+    .filter(x=>typeof x==='string').slice(0,400)
+  );
+  const cards=()=>Array.from(root.querySelectorAll('.ss-card'));
+  const toast=root.querySelector('.ss-toast');
+  let onlyFavorites=Boolean(readTab(keys.only,false));
+  function notify(message){
+    if(!toast)return;
+    toast.textContent=message;toast.style.display='block';
+    clearTimeout(root.__ssToastTimeout);
+    root.__ssToastTimeout=setTimeout(()=>{toast.style.display='none';},1800);
+  }
+  function resultText(count){
+    const label=root.dataset.searchLabel||'',tipo=root.dataset.typeLabel||'Todos';
+    const unit=label?(count===1?'resultado':'resultados'):(count===1?'entidade exibida':'entidades exibidas');
+    return count+' '+unit+(label?' para “'+label+'”':'')+(tipo==='Todos'?'':' · '+tipo);
+  }
+  function refreshFavorites(){
+    const fav=favorites();
+    const toggle=root.querySelector('[data-action="favorites-filter"]');
+    if(toggle){
+      toggle.setAttribute('aria-pressed',String(onlyFavorites));
+      toggle.textContent=(onlyFavorites?'★ Exibir todas':'☆ Meus favoritos')+' ('+fav.size+')';
+    }
+    let count=0;
+    cards().forEach(card=>{
+      const selected=fav.has(card.dataset.key);
+      card.classList.toggle('ss-card--favorite',selected);
+      const button=card.querySelector('[data-action="favorite"]');
+      if(button){
+        button.textContent=selected?'★':'☆';
+        button.setAttribute('aria-pressed',String(selected));
+        const title=card.querySelector('.ss-card-title')?.textContent||'entidade';
+        button.setAttribute('aria-label',(selected?'Remover dos favoritos: ':'Favoritar: ')+title);
+        button.title=selected?'Remover favorito':'Favoritar';
+      }
+      const hidden=onlyFavorites&&!selected;
+      card.classList.toggle('ss-hidden',hidden);
+      if(!hidden)count++;
+    });
+    root.querySelectorAll('.ss-group').forEach(group=>{
+      const visible=group.querySelectorAll('.ss-card:not(.ss-hidden)').length;
+      group.classList.toggle('ss-hidden',visible===0);
+      const slots=Math.max(1,Math.min(visible,5));
+      for(let k=1;k<=5;k++) group.classList.toggle('ss-group--size-'+k,k===slots);
+      const el=group.querySelector('.ss-group-title small');
+      if(el)el.textContent='('+visible+' '+(visible===1?'entidade':'entidades')+')';
+    });
+    const empty=root.querySelector('[data-fav-empty]');
+    if(empty)empty.classList.toggle('ss-hidden',!onlyFavorites || count>0);
+    const counter=root.querySelector('[data-result-count]');
+    if(counter)counter.textContent=resultText(count);
+  }
+  function recentItems(){
+    const r=readLocal(keys.recent,keys.oldRecent,[]);
+    return Array.isArray(r)?r.filter(item=>item&&validUrl(item.url)&&
+      typeof item.name==='string'&&typeof item.key==='string').slice(0,6):[];
+  }
+  function refreshRecents(){
+    const bar=root.querySelector('.ss-recent'),links=root.querySelector('.ss-recent-links');
+    if(!bar||!links)return;
+    const items=recentItems();
+    links.replaceChildren();
+    items.forEach(item=>{
+      const a=document.createElement('a');
+      a.className='ss-recent-link';
+      a.href=item.url;a.target='_blank';a.rel='noopener noreferrer';
+      a.textContent=item.name;a.title=item.name;
+      a.dataset.action='recent-open';a.dataset.key=item.key;
+      links.appendChild(a);
+    });
+    bar.style.display=items.length?'flex':'none';
+  }
+  function recordAccess(name,url,key){
+    if(!validUrl(url)||!key)return;
+    const items=[{name,url,key},...recentItems().filter(i=>i.key!==key)].slice(0,6);
+    saveLocal(keys.recent,items);
     refreshRecents();
   }
-  function refreshRecents() {
-    const items = read(keys.recent, []);
-    const bar = root.querySelector('.ss-recent');
-    const container = root.querySelector('.ss-recent-links');
-    container.replaceChildren();
-    bar.style.display = items.length ? 'flex':'none';
-    items.forEach(item => {
-      if (!item.url || !item.url.startsWith('https://ssveiculos.ssinformatica.net/')) return;
-      const link = document.createElement('a');
-      link.className = 'ss-recent-link';
-      link.href=item.url; link.target='_blank'; link.rel='noopener noreferrer';
-      link.textContent=item.name; link.title=item.name;
-      link.dataset.action='recent-open';link.dataset.key=item.key;
-      container.appendChild(link);
-    });
+  function showCopyFeedback(control){
+    const feedback=control.parentElement?.querySelector('.ss-copy-feedback');
+    if(!feedback){notify('Link copiado.');return;}
+    feedback.textContent='Link copiado';
+    feedback.classList.add('is-visible');
+    clearTimeout(feedback.__ssDelay);
+    feedback.__ssDelay=setTimeout(()=>feedback.classList.remove('is-visible'),1650);
   }
-  root.addEventListener('click', async (event) => {
-    const control = event.target.closest('[data-action]');
-    if (!control || !root.contains(control)) return;
+  root.addEventListener('click',async event=>{
+    const control=event.target.closest('[data-action]');
+    if(!control||!root.contains(control))return;
     const action=control.dataset.action;
     if(action==='favorite'){
-      const fav=getFavorites();
-      fav.has(control.dataset.key)?fav.delete(control.dataset.key):fav.add(control.dataset.key);
-      save(keys.fav,[...fav]); refreshFavorites();
-    }
-    if(action==='favorites-filter'){
+      const f=favorites(),id=control.dataset.key;
+      f.has(id)?f.delete(id):f.add(id);
+      saveLocal(keys.fav,[...f]);refreshFavorites();
+    }else if(action==='favorites-filter'){
       onlyFavorites=!onlyFavorites;
-      save(keys.only,onlyFavorites); refreshFavorites();
-    }
-    if(action==='copy'){
-      try {await navigator.clipboard.writeText(control.dataset.url);notify('Link copiado.');}
-      catch (e) { window.prompt('Copie o endereço:',control.dataset.url); }
-    }
-    if(action==='open'){
+      saveTab(keys.only,onlyFavorites);refreshFavorites();
+    }else if(action==='copy'){
+      try{
+        await navigator.clipboard.writeText(control.dataset.url);
+        showCopyFeedback(control);
+      }catch(e){window.prompt('Copie o endereço:',control.dataset.url);}
+    }else if(action==='open'){
       recordAccess(control.dataset.name,control.dataset.url,control.dataset.key);
-    }
-    if(action==='recent-open'){
+    }else if(action==='recent-open'){
       recordAccess(control.textContent,control.href,control.dataset.key);
-    }
-    if(action==='back-top'){
-      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const options = {top:0,behavior:reduced?'auto':'smooth'};
+    }else if(action==='back-top'){
+      const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const options={top:0,behavior:reduce?'auto':'smooth'};
       window.scrollTo(options);
-      for (const selector of ['[data-testid="stAppViewContainer"]','[data-testid="stMain"]']) {
-        const host = document.querySelector(selector);
-        if (host && typeof host.scrollTo==='function') host.scrollTo(options);
+      for(const selector of ['[data-testid="stAppViewContainer"]','[data-testid="stMain"]']){
+        const host=document.querySelector(selector);
+        if(host&&typeof host.scrollTo==='function')host.scrollTo(options);
       }
     }
   });
-  if (!window.__ssVeiculosShortcutInstalled) {
-    document.addEventListener('keydown', (event) => {
-      if ((event.ctrlKey||event.metaKey) && event.key.toLowerCase()==='k') {
+  if(!window.__ssVeiculosShortcutInstalled){
+    document.addEventListener('keydown',event=>{
+      if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){
         const input=document.querySelector('input[type="search"]');
-        if (input) {event.preventDefault(); input.focus(); input.select();}
+        if(input){event.preventDefault();input.focus();input.select();}
       }
     });
     window.__ssVeiculosShortcutInstalled=true;
   }
-  const scrollTargets = ['[data-testid="stAppViewContainer"]','[data-testid="stMain"]'];
-  const scrollPosition = () => {
-    const values = [window.scrollY || 0, document.documentElement.scrollTop || 0];
-    scrollTargets.forEach(selector => {
+  const scrollTargets=['[data-testid="stAppViewContainer"]','[data-testid="stMain"]'];
+  const getScroll=()=>{
+    const scroll=[window.scrollY||0,document.documentElement.scrollTop||0];
+    scrollTargets.forEach(selector=>{
       const host=document.querySelector(selector);
-      if (host) values.push(host.scrollTop || 0);
+      if(host)scroll.push(host.scrollTop||0);
     });
-    return Math.max(...values);
+    return Math.max(...scroll);
   };
-  const updateBackTop = () => {
-    const show = scrollPosition() > 340;
-    document.querySelectorAll('.ss-back-top').forEach(button => {
-      button.classList.toggle('is-visible',show);
-      button.tabIndex=show?0:-1;
-      button.setAttribute('aria-hidden',String(!show));
+  function updateBackTop(){
+    const visible=getScroll()>340;
+    document.querySelectorAll('.ss-back-top').forEach(button=>{
+      button.classList.toggle('is-visible',visible);
+      button.tabIndex=visible?0:-1;
+      button.setAttribute('aria-hidden',String(!visible));
     });
-  };
-  if (!window.__ssVeiculosBackTopInstalled) {
-    window.addEventListener('scroll',updateBackTop,{passive:true});
-    scrollTargets.forEach(selector => {
-      const host=document.querySelector(selector);
-      if(host) host.addEventListener('scroll',updateBackTop,{passive:true});
+  }
+  window.__ssVeiculosUpdateBackTop=updateBackTop;
+  if(!window.__ssVeiculosBackTopInstalled){
+    const handler=()=>window.__ssVeiculosUpdateBackTop?.();
+    window.addEventListener('scroll',handler,{passive:true});
+    scrollTargets.forEach(selector=>{
+      const node=document.querySelector(selector);
+      if(node)node.addEventListener('scroll',handler,{passive:true});
     });
     window.__ssVeiculosBackTopInstalled=true;
   }
-  refreshFavorites(); refreshRecents(); updateBackTop();
+  if(!window.__ssVeiculosStorageListener){
+    window.addEventListener('storage',event=>{
+      if(event.key===keys.fav||event.key===keys.recent){
+        const nodes=document.querySelectorAll('#ss-directory');
+        const current=nodes[nodes.length-1];
+        if(current)window.__ssVeiculosStorageRefresh?.();
+      }
+    });
+    window.__ssVeiculosStorageListener=true;
+  }
+  window.__ssVeiculosStorageRefresh=()=>{refreshFavorites();refreshRecents();};
+  refreshFavorites();refreshRecents();updateBackTop();
 })();

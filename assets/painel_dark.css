@@ -13,3 +13,6 @@
 
 .ss-link:hover {background:#06686c;}
 
+
+.ss-card--favorite {box-shadow:0 0 0 1px rgba(69,208,204,.25);}
+.ss-copy-feedback {background:#d7f6f3;color:#10373b;}
