@@ -21,14 +21,21 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          p = Path('assets/veiculosweb.png')
-          imagem = p.read_bytes()
-          assert imagem.startswith(b'\x89PNG\r\n\x1a\n'), 'Arquivo da logomarca não é PNG'
-          assert b'tRNS' in imagem or b'RGBA' in imagem, 'Logomarca deve ter transparência'
+          for nome in ('logo-painel-dark.png', 'logo-painel-light.png'):
+              p = Path('assets') / nome
+              imagem = p.read_bytes()
+              assert imagem.startswith(b'\x89PNG\r\n\x1a\n'), f'{nome}: não é PNG'
+              assert b'tRNS' in imagem or b'RGBA' in imagem, f'{nome}: sem transparência'
+              assert len(imagem) > 10000, f'{nome}: arquivo muito pequeno'
           for arquivo in ('assets/painel.css', 'assets/painel_dark.css', 'assets/interacoes.js', 'veiculos_data.py'):
               assert Path(arquivo).is_file(), arquivo
           codigo = Path('main.py').read_text(encoding='utf-8')
-          assert '<h1 class="ss-title">Painel de Acessos</h1>' in codigo
+          assert 'key="cabecalho_logo"' in codigo
+          assert '"logo-painel-dark.png" if TEMA_ESCURO else "logo-painel-light.png"' in codigo
+          assert 'st.image(str(logo_path), width=760)' in codigo
+          assert '<h1 class="ss-title">Painel de Acessos</h1>' not in codigo
+          assert 'Localize a entidade e abra seu ambiente de trabalho.' not in codigo
+          assert 'ss-sr-only' in codigo
           assert '<p class="ss-subtitle">Veículos Web</p>' not in codigo
           assert 'Somente com link' not in codigo
           assert 'st.toggle("Agrupar por município"' in codigo
@@ -39,6 +46,8 @@ jobs:
           assert 'Conferência cadastral' in codigo
           estilo = Path('assets/painel.css').read_text(encoding='utf-8')
           assert '.ss-metrics' not in estilo
+          assert '.st-key-cabecalho_logo' in estilo
+          assert 'object-fit:contain!important' in estilo
           assert 'horizontal_alignment="center"' in codigo
           assert 'key="filtros_centralizados"' in codigo
           assert 'width="content"' in codigo

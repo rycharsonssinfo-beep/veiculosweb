@@ -29,7 +29,8 @@ Central de navegação do **Grupo S&S Informática**, desenvolvida em Python e S
 - `veiculos_data.py` — cadastro de entidades, URLs e categorias; edite este arquivo para incluir municípios.
 - `assets/painel.css` e `assets/painel_dark.css` — identidade visual e ajustes de tema.
 - `assets/interacoes.js` — favoritos, histórico, cópia de endereços e atalhos.
-- `assets/veiculosweb.png` — nova logomarca VeículosWeb em PNG transparente.
+- `assets/logo-painel-dark.png` e `assets/logo-painel-light.png` — logomarca unificada **VeículosWeb · Painel de Acessos**, centralizada e transparente, em duas variantes para garantir contraste nos modos escuro e claro.
+- `assets/veiculosweb.png` — versão histórica anterior, mantida para eventual reversão.
 - `Grupo-SS.png` — arquivo histórico da logomarca anterior, mantido como referência (não utilizado no cabeçalho).
 - `requirements.txt` — versão do Streamlit.
 - `app.py` — compatibilidade com a implantação inicial do Streamlit Community Cloud; executa `main.py` em cada interação.
@@ -77,7 +78,7 @@ Os commits verificam automaticamente sintaxe, duplicidade de nomes ou endereços
 
 ## Identidade visual e navegadores
 
-O cabeçalho usa a marca transparente **VeículosWeb**, o título **Painel de Acessos** e uma descrição curta sem repetir o nome da marca. As cores dos controles nativos são padronizadas por CSS para reduzir discrepâncias entre Firefox e Chrome, inclusive quando cada navegador usa configuração de tema diferente. O modo escuro do Streamlit continua disponível.
+O cabeçalho utiliza exclusivamente a nova logomarca completa **VeículosWeb — Painel de Acessos**, centralizada; o título e a descrição HTML independentes foram removidos. O PNG foi recortado para evitar espaços transparentes excessivos. No tema claro, a segunda linha ganha uma cor mais escura para preservar a legibilidade. As cores dos controles nativos são padronizadas por CSS para reduzir discrepâncias entre Firefox e Chrome, inclusive quando cada navegador usa configuração de tema diferente. O modo escuro do Streamlit continua disponível.
 
 ## Preferências e privacidade
 

@@ -345,18 +345,23 @@ def limpar_filtros():
 # ==================================================
 # 6. CABEÇALHO COMPACTO (RENDERIZAÇÃO ESTÁTICA)
 # ==================================================
-logo_path = PASTA_ASSETS / "veiculosweb.png"
-marca, titulo = st.columns([1.5, 5.25], gap="small", vertical_alignment="center")
-with marca:
+# A logomarca completa substitui imagem, título e descrição separados.
+# Há uma variante de contraste para cada tema, ambas com transparência.
+logo_path = PASTA_ASSETS / (
+    "logo-painel-dark.png" if TEMA_ESCURO else "logo-painel-light.png"
+)
+with st.container(
+    key="cabecalho_logo",
+    horizontal=True,
+    horizontal_alignment="center",
+    vertical_alignment="center",
+):
     if logo_path.is_file():
-        st.image(str(logo_path), width=262)
+        st.image(str(logo_path), width=760)
     else:
-        st.markdown("**Veículos Web**")
-with titulo:
-    st.html("""<header class="ss-brand">
-      <h1 class="ss-title">Painel de Acessos</h1>
-      <p class="ss-description">Localize a entidade e abra seu ambiente de trabalho.</p>
-    </header>""")
+        st.markdown("## VeículosWeb — Painel de Acessos")
+# Texto de referência para leitores de tela, sem duplicar visualmente o título.
+st.html('<h1 class="ss-sr-only">VeículosWeb — Painel de Acessos</h1>')
 st.html('<div class="ss-rule" aria-hidden="true"></div>')
 
 registros = catalogo_unico(ENTIDADES + ACESSOS_ADICIONAIS)
