@@ -296,16 +296,22 @@ def renderizar_lista(lista, agrupar=False, termo=""):
         grupos = defaultdict(list)
         for e in lista:
             grupos[e["municipio"]].append(e)
+        # Cada grupo ocupa apenas as colunas necessárias, sem desperdiçar
+        # a largura inteira em municípios com um ou dois registros.
+        partes.append('<div class="ss-groups-layout" aria-label="Entidades agrupadas por município">')
         for cidade in sorted(grupos, key=normalizar):
             itens = grupos[cidade]
+            tamanho = min(len(itens), 5)
             partes.append(
-                '<section class="ss-group"><h3 class="ss-group-title">'
+                f'<section class="ss-group ss-group--size-{tamanho}">'
+                + '<h3 class="ss-group-title">'
                 + escape(cidade)
                 + f' <small>({len(itens)} {"entidade" if len(itens)==1 else "entidades"})</small>'
                 + '</h3><div class="ss-grid">'
             )
             partes.extend(criar_card(e, termo=termo) for e in itens)
             partes.append('</div></section>')
+        partes.append('</div>')
     else:
         partes.append('<section class="ss-grid" aria-label="Entidades municipais">')
         partes.extend(criar_card(e, termo=termo) for e in lista)

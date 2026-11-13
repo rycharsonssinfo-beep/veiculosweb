@@ -8,7 +8,7 @@ Central de navegação do **Grupo S&S Informática**, desenvolvida em Python e S
 - Pesquisa e filtros isolados em um `st.fragment`, mantendo o cabeçalho e os indicadores sem reconstrução desnecessária.
 - Filtros de **Prefeituras, Câmaras, Consórcios, Institutos, SAAEs e Ambientes especiais**, alinhados ao centro da página.
 - Ordenação priorizando correspondências exatas, seguidas de prefixos e correspondências parciais.
-- Visualização individual ou **agrupada por município**, mantendo o botão para limpar os filtros.
+- Visualização individual ou **agrupada por município** em grade fluida: grupos com 1 ou 2 acessos dividem a mesma linha com outros municípios, preservando os cards lado a lado e a ordem alfabética. Layout adaptável a celulares e favoritos, mantendo o botão para limpar os filtros.
 - Cards mais compactos (cinco colunas em telas largas), com município destacado na pesquisa e sem repetir a cidade quando ela já está no nome. Os botões de abrir, copiar e favoritar foram preservados.
 - **Favoritos** e **abertos recentemente** restritos à aba do navegador. Utilizam `sessionStorage`, sem banco de dados nem compartilhamento entre usuários. Ao encerrar a aba, os dados poderão ser descartados pelo navegador.
 - Atalho **Ctrl+K** (ou **Cmd+K**, onde o navegador permitir) para focar a pesquisa.

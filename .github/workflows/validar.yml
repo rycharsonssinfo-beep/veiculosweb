@@ -62,6 +62,11 @@ jobs:
           assert '.ss-back-top.is-visible' in css
           assert 'prefers-reduced-motion' in css
           assert 'ss-list-enter' in css
+          assert '.ss-groups-layout' in css
+          assert '.ss-group--size-2' in css
+          assert '.ss-group--size-5' in css
+          assert 'ss-group--size-' in codigo
+          assert "group.classList.toggle('ss-group--size-'" in js
           assert "if(action==='back-top')" in js
           print('Pesquisa e navegação: OK')
           PY

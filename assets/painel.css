@@ -53,6 +53,43 @@ html,body,[data-testid="stAppViewContainer"] {background:var(--ss-bg)!important;
 .ss-copy:hover {background:var(--ss-soft);}
 .ss-no-link {width:100%;min-height:43px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:var(--ss-bg);border:1px dashed var(--ss-line);color:var(--ss-muted);font-size:.80rem;}
 .ss-group {margin:18px 0 22px;}
+/* Agrupamento: grupos de municípios compartilham a mesma linha.
+   O tamanho do grupo acompanha quantos cards ele possui. */
+.ss-groups-layout {
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
+  column-gap:10px;row-gap:22px;align-items:start;margin:12px 0;
+}
+.ss-group {margin:0;min-width:0;grid-column:span 1;--ss-group-columns:1;}
+.ss-group--size-2 {grid-column:span 2;--ss-group-columns:2;}
+.ss-group--size-3 {grid-column:span 3;--ss-group-columns:3;}
+.ss-group--size-4 {grid-column:span 4;--ss-group-columns:4;}
+.ss-group--size-5 {grid-column:span 5;--ss-group-columns:5;}
+.ss-group .ss-grid {
+  grid-template-columns:repeat(var(--ss-group-columns),minmax(0,1fr));
+  margin:0;gap:10px;
+}
+.ss-group-title {min-height:1.55em;}
+@media (max-width:1250px) {
+  .ss-groups-layout {grid-template-columns:repeat(4,minmax(0,1fr));}
+  .ss-group--size-5 {grid-column:span 4;--ss-group-columns:4;}
+}
+@media (max-width:980px) {
+  .ss-groups-layout {grid-template-columns:repeat(3,minmax(0,1fr));}
+  .ss-group--size-4,.ss-group--size-5 {grid-column:span 3;--ss-group-columns:3;}
+}
+@media (max-width:730px) {
+  .ss-groups-layout {grid-template-columns:repeat(2,minmax(0,1fr));}
+  .ss-group--size-3,.ss-group--size-4,.ss-group--size-5 {
+    grid-column:span 2;--ss-group-columns:2;
+  }
+}
+@media (max-width:560px) {
+  .ss-groups-layout {grid-template-columns:1fr;row-gap:18px;}
+  .ss-groups-layout .ss-group {
+    grid-column:span 1;--ss-group-columns:1;
+  }
+}
+
 .ss-group-title {font-weight:760;font-size:.95rem;color:var(--ss-text);margin:0 0 6px;}
 .ss-group-title small {color:var(--ss-muted);font-weight:500;font-size:.76rem;}
 .ss-toolbar {display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap;margin-top:6px;}

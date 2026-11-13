@@ -43,7 +43,14 @@
       if (!hide) visible++;
     });
     root.querySelectorAll('.ss-group').forEach(group => {
-      group.classList.toggle('ss-hidden', !group.querySelector('.ss-card:not(.ss-hidden)'));
+      const visibleCount = group.querySelectorAll('.ss-card:not(.ss-hidden)').length;
+      group.classList.toggle('ss-hidden', visibleCount===0);
+      // No modo favoritos, um município com um único card visível
+      // deixa de reservar duas ou mais colunas na grade.
+      const slots = Math.max(1, Math.min(visibleCount,5));
+      for (let i=1;i<=5;i++) group.classList.toggle('ss-group--size-'+i,i===slots);
+      const counter = group.querySelector('.ss-group-title small');
+      if (counter) counter.textContent='('+visibleCount+' '+(visibleCount===1?'entidade':'entidades')+')';
     });
     const empty = root.querySelector('[data-fav-empty]');
     if (empty) empty.classList.toggle('ss-hidden', visible > 0);
