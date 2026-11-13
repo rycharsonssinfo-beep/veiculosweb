@@ -541,6 +541,20 @@ ENTIDADES = [
 # Para confirmar ou corrigir um registro, altere nome/categoria/municipio aqui.
 ACESSOS_ADICIONAIS = [
     {
+        "nome": "Prefeitura Municipal de Aiuaba",
+        "municipio": "Aiuaba",
+        "categoria": "Prefeituras",
+        "url": "https://ssveiculos.ssinformatica.net/Aiuaba",
+        "conferencia": "Classificação a conferir"
+    },
+    {
+        "nome": "Câmara Municipal de Canindé",
+        "municipio": "Canindé",
+        "categoria": "Câmaras",
+        "url": "https://ssveiculos.ssinformatica.net/CMCaninde",
+        "conferencia": "Classificação a conferir"
+    },
+    {
         "nome": "Prefeitura de Acaraú",
         "municipio": "Acaraú",
         "categoria": "Prefeituras",

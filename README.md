@@ -14,14 +14,14 @@ Central de navegação do **Grupo S&S Informática**, desenvolvida em Python e S
 - Atalho **Ctrl+K** (ou **Cmd+K**, onde o navegador permitir) para focar a pesquisa.
 - Botão **Voltar ao topo** após rolagem e transições curtas nos filtros e resultados, respeitando a preferência por movimento reduzido.
 - Tema claro/escuro com configuração oficial da cor turquesa (`.streamlit/config.toml`), menus suspensos identificados, título sem corte superior, favoritos destacados, controles responsivos e espaçamento vertical otimizado.
-- Seção de conferência dos 5 registros sem link e das classificações sugeridas para os 26 acessos adicionais; os endereços são pesquisáveis e abertos em nova aba quando houver URL.
+- Seção de conferência dos 5 registros sem link e das classificações sugeridas para os 28 acessos adicionais; os endereços são pesquisáveis e abertos em nova aba quando houver URL.
 
 ## Quantidades iniciais (novembro de 2026)
 
 - 87 entidades mantidas da planilha de origem (82 com link, 5 sem URL), após a retirada de Câmara Municipal de Jardim e Prefeitura Municipal de Jaguaribe.
 - 25 links adicionais do TXT incorporados à lista principal.
 - 1 novo link `https://ssveiculos.ssinformatica.net/IPMparaipaba`, classificado provisoriamente como Instituto.
-- **108 URLs únicas** disponíveis nos cards, **113 registros** no painel incluindo os 5 sem URL.
+- **110 URLs únicas** disponíveis nos cards, **115 registros** no painel incluindo os 5 sem URL.
 
 ## Estrutura
 
@@ -53,7 +53,7 @@ As categorias aceitas são **Prefeituras**, **Câmaras**, **Consórcios**, **Ins
 
 Ao salvar, a pesquisa, os filtros e a contagem de resultados serão atualizados automaticamente. Não adicione senhas ou tokens neste arquivo; o repositório é público.
 
-Os links adicionais fornecidos apenas por URL ficam em `ACESSOS_ADICIONAIS` e **já aparecem nos cards e na pesquisa**. Seus nomes e categorias são rótulos operacionais, marcados como "Classificação a conferir". O cadastro mantém também as entidades sem endereço, com botão desabilitado.
+Os links adicionais fornecidos apenas por URL ficam em `ACESSOS_ADICIONAIS` e **já aparecem nos cards e na pesquisa**. Na comparação da lista de 104 links recebida em novembro de 2026 foram acrescentados os acessos `/Aiuaba` (Prefeitura Municipal de Aiuaba) e `/CMCaninde` (Câmara Municipal de Canindé). O acesso a IPM Paraipaba foi mantido com a capitalização `/IPMparaipaba` já cadastrada, pois a lista recebida utiliza `/IPMParaipaba` e não houve confirmação de que são caminhos distintos. Seus nomes e categorias são rótulos operacionais, marcados como "Classificação a conferir". O cadastro mantém também as entidades sem endereço, com botão desabilitado.
 
 ## Executar localmente
 
