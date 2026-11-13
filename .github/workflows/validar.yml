@@ -14,7 +14,24 @@ jobs:
         with:
           python-version: '3.12'
       - name: Sintaxe
-        run: python -m py_compile main.py app.py
+        run: python -m py_compile main.py app.py veiculos_data.py
+      - name: Validar JavaScript
+        run: node --check assets/interacoes.js
+      - name: Verificar recursos visuais
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('assets/veiculosweb.png')
+          imagem = p.read_bytes()
+          assert imagem.startswith(b'\x89PNG\r\n\x1a\n'), 'Arquivo da logomarca não é PNG'
+          assert b'tRNS' in imagem or b'RGBA' in imagem, 'Logomarca deve ter transparência'
+          for arquivo in ('assets/painel.css', 'assets/painel_dark.css', 'assets/interacoes.js', 'veiculos_data.py'):
+              assert Path(arquivo).is_file(), arquivo
+          codigo = Path('main.py').read_text(encoding='utf-8')
+          assert '<p class="ss-subtitle">Veículos Web</p>' in codigo
+          assert 'Central municipal' not in codigo
+          print('Identidade visual e recursos: OK')
+          PY
       - name: Consistência cadastral
         run: |
           python - <<'PY'
@@ -24,7 +41,7 @@ jobs:
           from urllib.parse import urlparse
           import unicodedata
 
-          source = Path('main.py').read_text(encoding='utf-8')
+          source = Path('veiculos_data.py').read_text(encoding='utf-8')
           tree = ast.parse(source)
           names = {}
           for node in tree.body:

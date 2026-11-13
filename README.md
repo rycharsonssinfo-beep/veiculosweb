@@ -1,4 +1,4 @@
-# Painel de Acessos — Sistema de Veículos
+# Veículos Web — Painel de Acessos
 
 Central de navegação do **Grupo S&S Informática**, desenvolvida em Python e Streamlit para localizar entidades municipais e abrir seus ambientes do Sistema de Veículos.
 
@@ -24,15 +24,19 @@ Central de navegação do **Grupo S&S Informática**, desenvolvida em Python e S
 
 ## Estrutura
 
-- `main.py` — cadastro, validações, interface e interações; **único arquivo que precisa ser editado para acrescentar municípios**.
-- `Grupo-SS.png` — logomarca oficial.
+- `main.py` — ponto central da interface, pesquisas e funcionalidades.
+- `veiculos_data.py` — cadastro de entidades, URLs e categorias; edite este arquivo para incluir municípios.
+- `assets/painel.css` e `assets/painel_dark.css` — identidade visual e ajustes de tema.
+- `assets/interacoes.js` — favoritos, histórico, cópia de endereços e atalhos.
+- `assets/veiculosweb.png` — nova logomarca VeículosWeb em PNG transparente.
+- `Grupo-SS.png` — arquivo histórico da logomarca anterior, mantido como referência (não utilizado no cabeçalho).
 - `requirements.txt` — versão do Streamlit.
 - `app.py` — compatibilidade com a implantação inicial do Streamlit Community Cloud; executa `main.py` em cada interação.
 - `.github/workflows/validar.yml` — verificação automatizada de sintaxe e integridade dos cadastros. Não é utilizado em execução normal do painel.
 
 ## Atualizar ou incluir município
 
-Abra `main.py` e localize a lista `ENTIDADES`:
+Abra `veiculos_data.py` e localize a lista `ENTIDADES`:
 
 ```python
 {
@@ -69,3 +73,7 @@ Se o painel precisar ser exclusivo para a equipe de suporte, configure autentica
 ## Validação
 
 Os commits verificam automaticamente sintaxe, duplicidade de nomes ou endereços, categorias válidas e URLs HTTPS no domínio oficial. Além disso, é importante testar após mudanças no Streamlit: busca, troca de categorias, favoritos, link em nova aba e apresentação em dispositivos móveis e tema escuro.
+
+## Identidade visual e navegadores
+
+O cabeçalho usa a marca transparente **VeículosWeb** e o subtítulo **Veículos Web**. As cores dos controles nativos são padronizadas por CSS para reduzir discrepâncias entre Firefox e Chrome, inclusive quando cada navegador usa configuração de tema diferente. O modo escuro do Streamlit continua disponível.
