@@ -148,8 +148,8 @@ def svg_icone(categoria):
     )
 
 
-def ordem_busca(entidade, termo, ordenacao="Município"):
-    """Prioriza relevância na busca e utiliza o critério escolhido para desempatar."""
+def ordem_busca(entidade, termo):
+    """Ordena pelo município e nome da entidade; pesquisa prioriza relevância."""
     nome = normalizar(entidade["nome"])
     municipio = normalizar(entidade["municipio"])
     categoria = normalizar(entidade["categoria"])
@@ -163,16 +163,10 @@ def ordem_busca(entidade, termo, ordenacao="Município"):
         prioridade = 2
     else:
         prioridade = 3
-    if ordenacao == "Entidade":
-        criterios = (nome, municipio, categoria)
-    elif ordenacao == "Categoria":
-        criterios = (categoria, municipio, nome)
-    else:
-        criterios = (municipio, nome, categoria)
-    return (prioridade, *criterios)
+    return (prioridade, municipio, nome, categoria)
 
 
-def filtrar(itens, termo="", categoria="Todas", ordenacao="Município"):
+def filtrar(itens, termo="", categoria="Todas"):
     termo = normalizar(termo).strip()
     filtrados = [
         e for e in itens
@@ -183,7 +177,7 @@ def filtrar(itens, termo="", categoria="Todas", ordenacao="Município"):
             ))
         )
     ]
-    return sorted(filtrados, key=lambda e: ordem_busca(e, termo, ordenacao))
+    return sorted(filtrados, key=lambda e: ordem_busca(e, termo))
 
 
 def destacar_termo(texto, termo):
@@ -260,7 +254,7 @@ def criar_card(entidade, termo=""):
 INTERACOES_JS = "<script>\n" + (PASTA_ASSETS / "interacoes.js").read_text(encoding="utf-8") + "\n</script>"
 
 
-def renderizar_lista(lista, agrupar=False, termo="", ordenacao="Município"):
+def renderizar_lista(lista, agrupar=False, termo=""):
     busca = termo.strip()[:80]
     busca_segura = escape(busca, quote=True)
     palavra = "resultado" if len(lista) == 1 else "resultados"
@@ -290,7 +284,7 @@ def renderizar_lista(lista, agrupar=False, termo="", ordenacao="Município"):
         # Cada grupo ocupa apenas as colunas necessárias, sem desperdiçar
         # a largura inteira em municípios com um ou dois registros.
         partes.append('<div class="ss-groups-layout" aria-label="Entidades agrupadas por município">')
-        # A ordem dos grupos acompanha a ordenação escolhida na lista filtrada.
+        # A ordem dos grupos segue o município, com os registros em ordem alfabética.
         for cidade in dict.fromkeys(e["municipio"] for e in lista):
             itens = grupos[cidade]
             tamanho = min(len(itens), 5)
@@ -325,7 +319,6 @@ def limpar_filtros():
     st.session_state["busca"] = ""
     st.session_state["categoria_atual"] = "Todas"
     st.session_state["agrupar"] = False
-    st.session_state["ordenacao_atual"] = "Município"
 
 
 # ==================================================
@@ -402,15 +395,11 @@ def painel_pesquisa():
         wrap=True,
     ):
         agrupar = st.toggle("Agrupar por município", value=False, key="agrupar")
-        ordenacao = st.selectbox(
-            "Ordenar por", ["Município", "Entidade", "Categoria"],
-            key="ordenacao_atual", label_visibility="visible", width=190,
-        )
         st.button("Limpar filtros", icon=":material/refresh:", key="limpar",
                   on_click=limpar_filtros, width="content")
-    lista = filtrar(registros, pesquisa, categoria or "Todas", ordenacao=ordenacao)
+    lista = filtrar(registros, pesquisa, categoria or "Todas")
     # A barra da listagem reúne título, contagem, favoritos e recentes.
-    renderizar_lista(lista, agrupar=agrupar, termo=pesquisa, ordenacao=ordenacao)
+    renderizar_lista(lista, agrupar=agrupar, termo=pesquisa)
     if not lista:
         criterio = f' para “{escape(pesquisa)}”' if pesquisa else ''
         st.html(

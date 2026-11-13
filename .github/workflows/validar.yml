@@ -148,11 +148,13 @@ jobs:
           ]
           assert len(ctx['filtrar'](data))==4
           assert len(ctx['filtrar'](data,categoria='Câmaras'))==2
-          assert ctx['filtrar'](data,ordenacao='Município')[0]['municipio']=='Acaraú'
-          assert ctx['filtrar'](data,ordenacao='Entidade')[0]['nome']=='Ambiente de Treinamento'
-          assert ctx['filtrar'](data,ordenacao='Categoria')[0]['categoria']=='Ambientes especiais'
+          assert ctx['filtrar'](data)[0]['municipio']=='Acaraú'
+          assert ctx['filtrar'](data)[1]['municipio']=='Acaraú'
+          assert ctx['filtrar'](data,categoria='Câmaras')[0]['nome']=='Câmara de Acaraú'
           assert ctx['filtrar'](data,termo='caucaia')[0]['municipio']=='Caucaia'
-          assert 'key="ordenacao_atual"' in source
+          assert 'key="ordenacao_atual"' not in source
+          assert '"Ordenar por"' not in source
+          assert 'st.selectbox(' not in source
           assert 'key="tipo_ambiente_atual"' not in source
           assert 'def tipo_ambiente' not in source
           assert 'data-type-label' not in source
@@ -174,17 +176,18 @@ jobs:
           from pathlib import Path
           source=Path("main.py").read_text(encoding="utf-8")
           style=Path("assets/painel.css").read_text(encoding="utf-8")
-          assert '"Ordenar por", ["Município", "Entidade", "Categoria"]' in source
+          assert '"Ordenar por"' not in source
           assert '"Tipo de ambiente"' not in source
-          assert 'key="ordenacao_atual", label_visibility="visible"' in source
+          assert 'key="ordenacao_atual"' not in source
+          assert 'st.selectbox(' not in source
+          assert 'st.toggle("Agrupar por município"' in source
           assert 'key="tipo_ambiente_atual"' not in source
           assert '.ss-title' in style and 'line-height:1.28' in style
           assert 'padding:5px 0 2px!important' in style
           assert '.ss-fav[aria-pressed="true"]' in style
-          assert '[data-testid="stSelectbox"] label' in style
           assert '[data-testid="stHorizontalBlock"]:has(.ss-brand)' in style
           assert '@media (max-width:420px)' in style
-          print("Rótulos, título, favoritos e mobile: OK")
+          print("Controles simplificados, título, favoritos e mobile: OK")
           PY
       - name: Consistência cadastral
         run: |

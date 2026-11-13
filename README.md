@@ -6,8 +6,8 @@ Central de navegação do **Grupo S&S Informática**, desenvolvida em Python e S
 
 - Pesquisa por nome, município ou categoria, ignorando maiúsculas e acentos, com atualização após 250 ms sem digitar.
 - Pesquisa e filtros isolados em um `st.fragment`, mantendo o cabeçalho sem reconstrução desnecessária.
-- Filtros de **Prefeituras, Câmaras, Consórcios, Institutos, SAAEs e Ambientes especiais**, com ordenação por Município, Entidade ou Categoria e controles responsivos.
-- Ordenação selecionável por **Município**, **Entidade** ou **Categoria**; a pesquisa mantém a priorização dos resultados mais relevantes.
+- Filtros de **Prefeituras, Câmaras, Consórcios, Institutos, SAAEs e Ambientes especiais**, além de agrupamento por município e controles responsivos.
+- Ordenação automática **alfabética por município**, seguida do nome da entidade; a pesquisa mantém a priorização dos resultados mais relevantes.
 - Visualização individual ou **agrupada por município** em grade fluida: grupos com 1 ou 2 acessos dividem a mesma linha com outros municípios, preservando os cards lado a lado e a ordem alfabética. Layout adaptável a celulares e favoritos, mantendo o botão para limpar os filtros.
 - Cards compactos (cinco colunas em telas largas), com município destacado na pesquisa e sem repetir a cidade no nome; a classificação provisória aparece apenas na Conferência cadastral.
 - **Favoritos** e **acessos recentes** em faixa horizontal compacta, persistidos no mesmo navegador por `localStorage`, sem banco de dados ou sincronização entre dispositivos.
@@ -78,7 +78,7 @@ Os commits verificam automaticamente sintaxe, duplicidade de nomes ou endereços
 
 ## Identidade visual e navegadores
 
-O cabeçalho utiliza exclusivamente a logomarca completa **VeículosWeb — Painel de Acessos**, centralizada em 646 px no desktop, com margem de segurança superior para evitar corte e largura responsiva em celulares. O filtro por tipo de ambiente foi removido, mantendo filtros por categoria e ordenação. O título e a descrição HTML independentes permanecem removidos. O PNG foi recortado para evitar espaços transparentes excessivos. No tema claro, a segunda linha ganha uma cor mais escura para preservar a legibilidade. As cores dos controles nativos são padronizadas por CSS para reduzir discrepâncias entre Firefox e Chrome, inclusive quando cada navegador usa configuração de tema diferente. O modo escuro do Streamlit continua disponível.
+O cabeçalho utiliza exclusivamente a logomarca completa **VeículosWeb — Painel de Acessos**, centralizada em 646 px no desktop, com margem de segurança superior para evitar corte e largura responsiva em celulares. Os menus de ordenação e tipo de ambiente foram removidos; a lista mantém ordenação automática por município e filtros de categoria. O título e a descrição HTML independentes permanecem removidos. O PNG foi recortado para evitar espaços transparentes excessivos. No tema claro, a segunda linha ganha uma cor mais escura para preservar a legibilidade. As cores dos controles nativos são padronizadas por CSS para reduzir discrepâncias entre Firefox e Chrome, inclusive quando cada navegador usa configuração de tema diferente. O modo escuro do Streamlit continua disponível.
 
 ## Preferências e privacidade
 
