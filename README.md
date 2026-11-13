@@ -78,7 +78,7 @@ Os commits verificam automaticamente sintaxe, duplicidade de nomes ou endereços
 
 ## Identidade visual e navegadores
 
-O cabeçalho utiliza exclusivamente a nova logomarca completa **VeículosWeb — Painel de Acessos**, centralizada; o título e a descrição HTML independentes foram removidos. O PNG foi recortado para evitar espaços transparentes excessivos. No tema claro, a segunda linha ganha uma cor mais escura para preservar a legibilidade. As cores dos controles nativos são padronizadas por CSS para reduzir discrepâncias entre Firefox e Chrome, inclusive quando cada navegador usa configuração de tema diferente. O modo escuro do Streamlit continua disponível.
+O cabeçalho utiliza exclusivamente a nova logomarca completa **VeículosWeb — Painel de Acessos**, centralizada em 646 px no desktop (15% menor que a versão anterior), com menor espaço até a linha divisória e limite responsivo de largura em celulares; o título e a descrição HTML independentes foram removidos. O PNG foi recortado para evitar espaços transparentes excessivos. No tema claro, a segunda linha ganha uma cor mais escura para preservar a legibilidade. As cores dos controles nativos são padronizadas por CSS para reduzir discrepâncias entre Firefox e Chrome, inclusive quando cada navegador usa configuração de tema diferente. O modo escuro do Streamlit continua disponível.
 
 ## Preferências e privacidade
 

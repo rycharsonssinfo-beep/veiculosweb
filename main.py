@@ -357,7 +357,7 @@ with st.container(
     vertical_alignment="center",
 ):
     if logo_path.is_file():
-        st.image(str(logo_path), width=760)
+        st.image(str(logo_path), width=646)
     else:
         st.markdown("## VeículosWeb — Painel de Acessos")
 # Texto de referência para leitores de tela, sem duplicar visualmente o título.

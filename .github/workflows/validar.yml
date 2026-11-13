@@ -32,7 +32,7 @@ jobs:
           codigo = Path('main.py').read_text(encoding='utf-8')
           assert 'key="cabecalho_logo"' in codigo
           assert '"logo-painel-dark.png" if TEMA_ESCURO else "logo-painel-light.png"' in codigo
-          assert 'st.image(str(logo_path), width=760)' in codigo
+          assert 'st.image(str(logo_path), width=646)' in codigo
           assert '<h1 class="ss-title">Painel de Acessos</h1>' not in codigo
           assert 'Localize a entidade e abra seu ambiente de trabalho.' not in codigo
           assert 'ss-sr-only' in codigo
@@ -48,6 +48,10 @@ jobs:
           assert '.ss-metrics' not in estilo
           assert '.st-key-cabecalho_logo' in estilo
           assert 'object-fit:contain!important' in estilo
+          assert 'width:min(100%,646px)!important' in estilo
+          assert 'width:min(100%,520px)!important' in estilo
+          assert 'max-width:calc(100vw - 2.5rem)!important' in estilo
+          assert 'margin:0 auto -.65rem!important' in estilo
           assert 'horizontal_alignment="center"' in codigo
           assert 'key="filtros_centralizados"' in codigo
           assert 'width="content"' in codigo

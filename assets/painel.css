@@ -226,7 +226,7 @@ div[data-testid="stTextInput"] [data-baseweb="base-input"] {
 :root {--ss-accent:#007e81;--ss-accent-strong:#005e61;}
 .block-container {padding-top:2.55rem;padding-bottom:1.25rem;}
 .ss-brand {min-height:72px;overflow:visible!important;}
-.ss-rule {margin:3px 0 5px;}
+.ss-rule {margin:1px 0 5px;}
 .ss-title {letter-spacing:-.038em;}
 .ss-card {min-height:146px;padding:11px 12px;border-radius:11px;}
 .ss-card-top {min-height:30px;margin-bottom:7px;}
@@ -351,12 +351,12 @@ div[data-testid="stTextInput"] [data-baseweb="base-input"] {
   align-items:center!important;
   width:100%!important;
   min-width:0!important;
-  padding:2px 0 7px!important;
-  margin:0 auto!important;
+  padding:0 0 1px!important;
+  margin:0 auto -.65rem!important;
   overflow:visible!important;
 }
 .st-key-cabecalho_logo [data-testid="stImage"] {
-  width:min(100%,760px)!important;
+  width:min(100%,646px)!important;
   max-width:100%!important;
   min-width:0!important;
   margin-inline:auto!important;
@@ -381,6 +381,17 @@ div[data-testid="stTextInput"] [data-baseweb="base-input"] {
   white-space:nowrap!important;border:0!important;
 }
 @media (max-width:640px) {
-  .st-key-cabecalho_logo {padding:0 0 5px!important;}
-  .st-key-cabecalho_logo [data-testid="stImage"] {width:100%!important;max-width:100%!important;}
+  .st-key-cabecalho_logo {padding:0!important;margin-bottom:-.3rem!important;}
+  .st-key-cabecalho_logo [data-testid="stImage"] {
+    width:min(100%,520px)!important;
+    max-width:calc(100vw - 2rem)!important;
+    margin-inline:auto!important;
+  }
+}
+@media (max-width:420px) {
+  .st-key-cabecalho_logo [data-testid="stImage"] {
+    width:100%!important;
+    max-width:calc(100vw - 2.5rem)!important;
+    margin-inline:auto!important;
+  }
 }
