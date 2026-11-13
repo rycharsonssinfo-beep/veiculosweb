@@ -48,7 +48,12 @@
     const empty = root.querySelector('[data-fav-empty]');
     if (empty) empty.classList.toggle('ss-hidden', visible > 0);
     const count = root.querySelector('[data-result-count]');
-    if (count) count.textContent = visible+' '+(visible===1?'entidade exibida':'entidades exibidas');
+    if (count) {
+      const label = root.dataset.searchLabel || '';
+      count.textContent = label
+        ? visible+' '+(visible===1?'resultado':'resultados')+' para “'+label+'”'
+        : visible+' '+(visible===1?'entidade exibida':'entidades exibidas');
+    }
   }
   function recordAccess(name,url,key) {
     if (!url || !url.startsWith('https://ssveiculos.ssinformatica.net/')) return;
@@ -96,6 +101,15 @@
     if(action==='recent-open'){
       recordAccess(control.textContent,control.href,control.dataset.key);
     }
+    if(action==='back-top'){
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const options = {top:0,behavior:reduced?'auto':'smooth'};
+      window.scrollTo(options);
+      for (const selector of ['[data-testid="stAppViewContainer"]','[data-testid="stMain"]']) {
+        const host = document.querySelector(selector);
+        if (host && typeof host.scrollTo==='function') host.scrollTo(options);
+      }
+    }
   });
   if (!window.__ssVeiculosShortcutInstalled) {
     document.addEventListener('keydown', (event) => {
@@ -106,5 +120,30 @@
     });
     window.__ssVeiculosShortcutInstalled=true;
   }
-  refreshFavorites(); refreshRecents();
+  const scrollTargets = ['[data-testid="stAppViewContainer"]','[data-testid="stMain"]'];
+  const scrollPosition = () => {
+    const values = [window.scrollY || 0, document.documentElement.scrollTop || 0];
+    scrollTargets.forEach(selector => {
+      const host=document.querySelector(selector);
+      if (host) values.push(host.scrollTop || 0);
+    });
+    return Math.max(...values);
+  };
+  const updateBackTop = () => {
+    const show = scrollPosition() > 340;
+    document.querySelectorAll('.ss-back-top').forEach(button => {
+      button.classList.toggle('is-visible',show);
+      button.tabIndex=show?0:-1;
+      button.setAttribute('aria-hidden',String(!show));
+    });
+  };
+  if (!window.__ssVeiculosBackTopInstalled) {
+    window.addEventListener('scroll',updateBackTop,{passive:true});
+    scrollTargets.forEach(selector => {
+      const host=document.querySelector(selector);
+      if(host) host.addEventListener('scroll',updateBackTop,{passive:true});
+    });
+    window.__ssVeiculosBackTopInstalled=true;
+  }
+  refreshFavorites(); refreshRecents(); updateBackTop();
 })();

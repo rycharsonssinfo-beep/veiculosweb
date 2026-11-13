@@ -5,6 +5,7 @@
  --ss-text:#e9f5f4;--ss-muted:#b4cccd;--ss-line:#395458;
  --ss-badge:#29484c;--ss-badge-text:#d0e9e9;
  --ss-shadow:0 4px 18px rgba(0,0,0,.15);
+ --ss-match-bg:#286564;--ss-match-text:#efffff;
 }
 .ss-link {background:#087c80;color:#fff!important;}
 

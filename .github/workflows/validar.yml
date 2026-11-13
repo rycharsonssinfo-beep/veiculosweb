@@ -37,6 +37,34 @@ jobs:
           assert '[data-testid="stPills"]' in estilo
           print('Identidade visual e recursos: OK')
           PY
+      - name: Verificar destaque de pesquisa e navegação
+        run: |
+          python - <<'PY'
+          import ast
+          import unicodedata
+          from html import escape
+          from pathlib import Path
+          codigo=Path('main.py').read_text(encoding='utf-8')
+          tree=ast.parse(codigo)
+          funcoes=[node for node in tree.body if isinstance(node,ast.FunctionDef) and node.name in ('normalizar','destacar_termo')]
+          assert len(funcoes)==2, 'Funções de destaque ausentes'
+          contexto={'unicodedata':unicodedata,'escape':escape}
+          exec(compile(ast.Module(body=funcoes,type_ignores=[]),'verificacao','exec'),contexto)
+          destacar=contexto['destacar_termo']
+          assert '<mark class="ss-match">Maranguape</mark>' in destacar('Câmara Municipal de Maranguape','maranguape')
+          assert '<mark class="ss-match">Acaraú</mark>' in destacar('Prefeitura de Acaraú','ACARAU')
+          assert '<mark' not in destacar('Câmara Municipal de Cruz','Fortaleza')
+          assert '&lt;' in destacar('<Câmara>', 'camara')
+          assert 'cidade_duplicada' in codigo
+          assert 'data-action="back-top"' in codigo
+          css=Path('assets/painel.css').read_text(encoding='utf-8')
+          js=Path('assets/interacoes.js').read_text(encoding='utf-8')
+          assert '.ss-back-top.is-visible' in css
+          assert 'prefers-reduced-motion' in css
+          assert 'ss-list-enter' in css
+          assert "if(action==='back-top')" in js
+          print('Pesquisa e navegação: OK')
+          PY
       - name: Consistência cadastral
         run: |
           python - <<'PY'

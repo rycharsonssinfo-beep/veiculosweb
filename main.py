@@ -195,10 +195,38 @@ def renderizar_indicadores(total, com_url, pendentes):
     st.html("".join(partes) + "</div>")
 
 
-def criar_card(entidade):
+def destacar_termo(texto, termo):
+    """Destaca a correspondência sem perder acentos ou aceitar HTML da pesquisa."""
+    texto = str(texto)
+    busca = normalizar(termo).strip()
+    if not busca:
+        return escape(texto)
+    letras, posicoes = [], []
+    for indice, caractere in enumerate(texto):
+        for letra in normalizar(caractere):
+            letras.append(letra)
+            posicoes.append(indice)
+    inicio_norm = "".join(letras).find(busca)
+    if inicio_norm == -1:
+        return escape(texto)
+    inicio = posicoes[inicio_norm]
+    fim = posicoes[inicio_norm + len(busca) - 1] + 1
+    return (
+        escape(texto[:inicio])
+        + '<mark class="ss-match">'
+        + escape(texto[inicio:fim])
+        + "</mark>"
+        + escape(texto[fim:])
+    )
+
+
+def criar_card(entidade, termo=""):
     """Card com URL original, favorito por sessão e cópia rápida."""
     nome = escape(entidade["nome"], quote=True)
-    cidade = escape(entidade["municipio"], quote=True)
+    nome_destacado = destacar_termo(entidade["nome"], termo)
+    cidade_destacada = destacar_termo(entidade["municipio"], termo)
+    # Oculta a segunda linha quando o município já aparece no nome completo.
+    cidade_duplicada = normalizar(entidade["municipio"]) in normalizar(entidade["nome"])
     cat = escape(ROTULOS_CATEGORIA.get(entidade["categoria"], entidade["categoria"]), quote=True)
     classificacao = bool(entidade.get("conferencia"))
     chave = escape(id_entidade(entidade), quote=True)
@@ -226,7 +254,8 @@ def criar_card(entidade):
         + f'</span><span class="ss-tag">{cat}</span>'
         + f'<button type="button" class="ss-fav" data-action="favorite" data-key="{chave}" '
         + f'aria-pressed="false" aria-label="Favoritar {nome}" title="Favoritar">☆</button></div>'
-        + f'<h3 class="ss-card-title">{nome}</h3><p class="ss-card-city">{cidade}</p>'
+        + f'<h3 class="ss-card-title">{nome_destacado}</h3>'
+        + ('' if cidade_duplicada else f'<p class="ss-card-city">{cidade_destacada}</p>')
         + ('<p class="ss-review">Classificação a conferir</p>' if classificacao else '')
         + f'<div class="ss-grow"></div><div class="ss-actions">{acoes}</div></article>'
     )
@@ -241,12 +270,20 @@ def criar_card(entidade):
 INTERACOES_JS = "<script>\n" + (PASTA_ASSETS / "interacoes.js").read_text(encoding="utf-8") + "\n</script>"
 
 
-def renderizar_lista(lista, agrupar=False):
-    partes = ['<div id="ss-directory" class="ss-directory">']
+def renderizar_lista(lista, agrupar=False, termo=""):
+    busca = termo.strip()[:80]
+    busca_segura = escape(busca, quote=True)
+    palavra = "resultado" if len(lista) == 1 else "resultados"
+    contador = (
+        f'{len(lista)} {palavra} para “{escape(busca)}”'
+        if busca
+        else f'{len(lista)} entidades exibidas'
+    )
+    partes = [f'<div id="ss-directory" class="ss-directory" data-search-label="{busca_segura}">']
     partes.append(
         '<div class="ss-toolbar"><span class="ss-results-meta" '
         'data-result-count aria-live="polite">'
-        + f'{len(lista)} entidades exibidas</span>'
+        + contador + '</span>'
         + '<button type="button" data-action="favorites-filter" '
         'class="ss-fav-filter" aria-pressed="false">☆ Meus favoritos</button></div>'
     )
@@ -267,15 +304,18 @@ def renderizar_lista(lista, agrupar=False):
                 + f' <small>({len(itens)} {"entidade" if len(itens)==1 else "entidades"})</small>'
                 + '</h3><div class="ss-grid">'
             )
-            partes.extend(criar_card(e) for e in itens)
+            partes.extend(criar_card(e, termo=termo) for e in itens)
             partes.append('</div></section>')
     else:
         partes.append('<section class="ss-grid" aria-label="Entidades municipais">')
-        partes.extend(criar_card(e) for e in lista)
+        partes.extend(criar_card(e, termo=termo) for e in lista)
         partes.append('</section>')
     partes.append(
         '<div class="ss-empty ss-hidden" data-fav-empty>'
         'Nenhuma entidade favoritada nesta seleção.</div>'
+        '<button type="button" class="ss-back-top" data-action="back-top" '
+        'aria-label="Voltar ao topo" aria-hidden="true" tabindex="-1" title="Voltar ao topo">'
+        '<span aria-hidden="true">↑</span><span>Topo</span></button>'
         '<div class="ss-toast" role="status" aria-live="polite"></div></div>'
     )
     # st.html não usa iframe; todos os botões ficam acessíveis ao teclado.
@@ -352,7 +392,7 @@ def painel_pesquisa():
     if not lista:
         st.html('<div class="ss-empty" role="status">Nenhuma entidade encontrada. Tente outro nome ou remova os filtros.</div>')
     # Sempre renderiza o histórico, mesmo que a pesquisa não tenha resultados.
-    renderizar_lista(lista, agrupar=agrupar)
+    renderizar_lista(lista, agrupar=agrupar, termo=pesquisa)
     st.html('<p class="ss-accessibility-note">Favoritos e recentes ficam somente nesta aba do navegador.</p>')
 
 
