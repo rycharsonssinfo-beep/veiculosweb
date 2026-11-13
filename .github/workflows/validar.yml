@@ -223,7 +223,16 @@ jobs:
                   assert u.scheme=='https' and u.hostname=='ssveiculos.ssinformatica.net' and u.path not in ('','/'), e
                   assert e['url'] not in urls, f'URL duplicada: {e}'
                   urls.add(e['url'])
-          assert len(urls) >= 108, f'Esperados pelo menos 108 endereços; encontrados {len(urls)}'
+          assert len(entidades) == 87, f'Esperadas 87 entidades de origem; encontradas {len(entidades)}'
+          assert len(adicionais) == 26, f'Esperados 26 acessos adicionais; encontrados {len(adicionais)}'
+          assert len(entidades) + len(adicionais) == 113, 'Total inesperado de registros'
+          assert len(urls) == 108, f'Esperados 108 endereços; encontrados {len(urls)}'
+          assert sum(not e['url'] for e in entidades + adicionais) == 5, 'Quantidade de pendências incorreta'
+          nomes = {e['nome'] for e in entidades + adicionais}
+          assert 'Câmara Municipal de Jardim' not in nomes
+          assert 'Prefeitura Municipal de Jaguaribe' not in nomes
+          assert 'Prefeitura Municipal de Jardim' in nomes
+          assert 'Serviço Autônomo de Água e Esgoto de Jaguaribe' in nomes
           assert 'https://ssveiculos.ssinformatica.net/IPMparaipaba' in urls
           print(f'OK — {len(entidades)} entidades de origem, {len(adicionais)} acessos adicionais; {len(urls)} URLs únicas')
           PY

@@ -157,12 +157,6 @@ ENTIDADES = [
         "url": "https://ssveiculos.ssinformatica.net/Itapiuna"
     },
     {
-        "nome": "Prefeitura Municipal de Jaguaribe",
-        "municipio": "Jaguaribe",
-        "categoria": "Prefeituras",
-        "url": ""
-    },
-    {
         "nome": "Prefeitura Municipal de Jardim",
         "municipio": "Jardim",
         "categoria": "Prefeituras",
@@ -383,12 +377,6 @@ ENTIDADES = [
         "municipio": "Itapiuna",
         "categoria": "Câmaras",
         "url": "https://ssveiculos.ssinformatica.net/CMItapiuna"
-    },
-    {
-        "nome": "Câmara Municipal de Jardim",
-        "municipio": "Jardim",
-        "categoria": "Câmaras",
-        "url": ""
     },
     {
         "nome": "Câmara Municipal de Maranguape",
