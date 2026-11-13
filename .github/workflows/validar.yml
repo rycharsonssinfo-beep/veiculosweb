@@ -27,6 +27,13 @@ jobs:
               assert imagem.startswith(b'\x89PNG\r\n\x1a\n'), f'{nome}: não é PNG'
               assert b'tRNS' in imagem or b'RGBA' in imagem, f'{nome}: sem transparência'
               assert len(imagem) > 10000, f'{nome}: arquivo muito pequeno'
+          for nome in ('logo-painel-dark-fiel.png', 'logo-painel-light-fiel.png'):
+              imagem = (Path('assets') / nome).read_bytes()
+              assert imagem.startswith(b'\x89PNG\r\n\x1a\n'), f'{nome}: formato PNG inválido'
+              assert int.from_bytes(imagem[16:20], 'big') >= 1500, f'{nome}: largura insuficiente'
+              assert int.from_bytes(imagem[20:24], 'big') >= 315, f'{nome}: altura insuficiente'
+              assert imagem[25] == 6, f'{nome}: requer PNG RGBA com transparência'
+              assert len(imagem) > 50000, f'{nome}: conteúdo incompleto'
           import xml.etree.ElementTree as ET
           for nome in ('logo-painel-dark-vector.svg', 'logo-painel-light-vector.svg'):
               svg = (Path('assets') / nome).read_text(encoding='utf-8')
@@ -40,7 +47,7 @@ jobs:
               assert Path(arquivo).is_file(), arquivo
           codigo = Path('main.py').read_text(encoding='utf-8')
           assert 'key="cabecalho_logo"' in codigo
-          assert '"logo-painel-dark-vector.svg" if TEMA_ESCURO else "logo-painel-light-vector.svg"' in codigo
+          assert '"logo-painel-dark-fiel.png" if TEMA_ESCURO else "logo-painel-light-fiel.png"' in codigo
           assert 'st.image(str(logo_path), width=646)' in codigo
           assert '<h1 class="ss-title">Painel de Acessos</h1>' not in codigo
           assert 'Localize a entidade e abra seu ambiente de trabalho.' not in codigo
