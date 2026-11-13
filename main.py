@@ -148,17 +148,6 @@ def svg_icone(categoria):
     )
 
 
-def tipo_ambiente(entidade):
-    """Ambiente operacional: municipais, internos ou treinamento."""
-    caminho = normalizar(urlparse(entidade.get("url", "")).path.lstrip("/"))
-    nome = normalizar(entidade["nome"])
-    if caminho == "treinamento" or "treinamento" in nome:
-        return "Treinamento"
-    if entidade["categoria"] == "Ambientes especiais":
-        return "Internos"
-    return "Municipais"
-
-
 def ordem_busca(entidade, termo, ordenacao="Município"):
     """Prioriza relevância na busca e utiliza o critério escolhido para desempatar."""
     nome = normalizar(entidade["nome"])
@@ -183,12 +172,11 @@ def ordem_busca(entidade, termo, ordenacao="Município"):
     return (prioridade, *criterios)
 
 
-def filtrar(itens, termo="", categoria="Todas", tipo="Todos", ordenacao="Município"):
+def filtrar(itens, termo="", categoria="Todas", ordenacao="Município"):
     termo = normalizar(termo).strip()
     filtrados = [
         e for e in itens
         if (categoria == "Todas" or e["categoria"] == categoria)
-        and (tipo == "Todos" or tipo_ambiente(e) == tipo)
         and (
             not termo or termo in normalizar(" ".join(
                 (e["nome"], e["municipio"], e["categoria"], urlparse(e["url"]).path.lstrip("/"))
@@ -272,7 +260,7 @@ def criar_card(entidade, termo=""):
 INTERACOES_JS = "<script>\n" + (PASTA_ASSETS / "interacoes.js").read_text(encoding="utf-8") + "\n</script>"
 
 
-def renderizar_lista(lista, agrupar=False, termo="", tipo="Todos", ordenacao="Município"):
+def renderizar_lista(lista, agrupar=False, termo="", ordenacao="Município"):
     busca = termo.strip()[:80]
     busca_segura = escape(busca, quote=True)
     palavra = "resultado" if len(lista) == 1 else "resultados"
@@ -281,8 +269,7 @@ def renderizar_lista(lista, agrupar=False, termo="", tipo="Todos", ordenacao="Mu
         if busca
         else f'{len(lista)} entidades exibidas'
     )
-    tipo_attr = escape(tipo, quote=True)
-    partes = [f'<div id="ss-directory" class="ss-directory" data-search-label="{busca_segura}" data-type-label="{tipo_attr}">']
+    partes = [f'<div id="ss-directory" class="ss-directory" data-search-label="{busca_segura}">']
     partes.append(
         '<div class="ss-toolbar">'
         '<div class="ss-toolbar-heading"><h2>Entidades e ambientes</h2>'
@@ -338,7 +325,6 @@ def limpar_filtros():
     st.session_state["busca"] = ""
     st.session_state["categoria_atual"] = "Todas"
     st.session_state["agrupar"] = False
-    st.session_state["tipo_ambiente_atual"] = "Todos"
     st.session_state["ordenacao_atual"] = "Município"
 
 
@@ -420,21 +406,17 @@ def painel_pesquisa():
             "Ordenar por", ["Município", "Entidade", "Categoria"],
             key="ordenacao_atual", label_visibility="visible", width=190,
         )
-        tipo = st.selectbox(
-            "Tipo de ambiente", ["Todos", "Municipais", "Internos", "Treinamento"],
-            key="tipo_ambiente_atual", label_visibility="visible", width=190,
-        )
         st.button("Limpar filtros", icon=":material/refresh:", key="limpar",
                   on_click=limpar_filtros, width="content")
-    lista = filtrar(registros, pesquisa, categoria or "Todas", tipo, ordenacao)
+    lista = filtrar(registros, pesquisa, categoria or "Todas", ordenacao=ordenacao)
     # A barra da listagem reúne título, contagem, favoritos e recentes.
-    renderizar_lista(lista, agrupar=agrupar, termo=pesquisa, tipo=tipo, ordenacao=ordenacao)
+    renderizar_lista(lista, agrupar=agrupar, termo=pesquisa, ordenacao=ordenacao)
     if not lista:
         criterio = f' para “{escape(pesquisa)}”' if pesquisa else ''
         st.html(
             '<div class="ss-empty ss-empty--search" role="status">'
             '<strong>Nenhum acesso encontrado' + criterio + '.</strong>'
-            '<span>Tente outro município ou revise a categoria e o tipo de ambiente.</span>'
+            '<span>Tente outro município ou revise a categoria selecionada.</span>'
             '</div>'
         )
         st.button("Mostrar todos os acessos", key="limpar_sem_resultados",

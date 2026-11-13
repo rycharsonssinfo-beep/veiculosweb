@@ -60,9 +60,9 @@
     root.__ssToastTimeout=setTimeout(()=>{toast.style.display='none';},1800);
   }
   function resultText(count){
-    const label=root.dataset.searchLabel||'',tipo=root.dataset.typeLabel||'Todos';
+    const label=root.dataset.searchLabel||'';
     const unit=label?(count===1?'resultado':'resultados'):(count===1?'entidade exibida':'entidades exibidas');
-    return count+' '+unit+(label?' para “'+label+'”':'')+(tipo==='Todos'?'':' · '+tipo);
+    return count+' '+unit+(label?' para “'+label+'”':'');
   }
   function refreshFavorites(){
     const fav=favorites();

@@ -51,7 +51,9 @@ jobs:
           assert 'width:min(100%,646px)!important' in estilo
           assert 'width:min(100%,520px)!important' in estilo
           assert 'max-width:calc(100vw - 2.5rem)!important' in estilo
-          assert 'margin:0 auto -.65rem!important' in estilo
+          assert 'padding:14px 0 6px!important' in estilo
+          assert 'margin:0 auto!important' in estilo
+          assert 'overflow:visible!important' in estilo
           assert 'horizontal_alignment="center"' in codigo
           assert 'key="filtros_centralizados"' in codigo
           assert 'width="content"' in codigo
@@ -125,7 +127,7 @@ jobs:
           assert "bar.style.display=items.length?'flex':'none'" in javascript
           print('Ordenação e apresentação: OK')
           PY
-      - name: Novos filtros, preferências e cores
+      - name: Filtros simplificados, preferências e cores
         run: |
           python - <<'PY'
           import ast, unicodedata
@@ -133,30 +135,27 @@ jobs:
           from urllib.parse import urlparse
           source=Path('main.py').read_text(encoding='utf-8')
           tree=ast.parse(source)
-          names=('normalizar','tipo_ambiente','ordem_busca','filtrar')
+          names=('normalizar','ordem_busca','filtrar')
           funcs=[node for node in tree.body if isinstance(node,ast.FunctionDef) and node.name in names]
-          assert len(funcs)==4
+          assert len(funcs)==3
           ctx={'unicodedata':unicodedata,'urlparse':urlparse}
           exec(compile(ast.Module(body=funcs,type_ignores=[]),'filters','exec'),ctx)
           data=[
               dict(nome='Câmara de Caucaia',municipio='Caucaia',categoria='Câmaras',url=''),
               dict(nome='Prefeitura de Acaraú',municipio='Acaraú',categoria='Prefeituras',url=''),
               dict(nome='Câmara de Acaraú',municipio='Acaraú',categoria='Câmaras',url=''),
-              dict(nome='Treinamento',municipio='Grupo S&S',categoria='Ambientes especiais',url='https://ssveiculos.ssinformatica.net/Treinamento'),
-              dict(nome='SS Informática',municipio='Grupo S&S',categoria='Ambientes especiais',url='https://ssveiculos.ssinformatica.net/SSInformatica')
+              dict(nome='Ambiente de Treinamento',municipio='Grupo S&S',categoria='Ambientes especiais',url='https://ssveiculos.ssinformatica.net/Treinamento')
           ]
-          assert ctx['tipo_ambiente'](data[3])=='Treinamento'
-          assert ctx['tipo_ambiente'](data[4])=='Internos'
-          assert ctx['tipo_ambiente'](data[0])=='Municipais'
-          assert len(ctx['filtrar'](data,tipo='Municipais'))==3
-          assert len(ctx['filtrar'](data,tipo='Internos'))==1
-          assert len(ctx['filtrar'](data,tipo='Treinamento'))==1
+          assert len(ctx['filtrar'](data))==4
+          assert len(ctx['filtrar'](data,categoria='Câmaras'))==2
           assert ctx['filtrar'](data,ordenacao='Município')[0]['municipio']=='Acaraú'
-          assert ctx['filtrar'](data,ordenacao='Entidade')[0]['nome']=='Câmara de Acaraú'
+          assert ctx['filtrar'](data,ordenacao='Entidade')[0]['nome']=='Ambiente de Treinamento'
           assert ctx['filtrar'](data,ordenacao='Categoria')[0]['categoria']=='Ambientes especiais'
           assert ctx['filtrar'](data,termo='caucaia')[0]['municipio']=='Caucaia'
           assert 'key="ordenacao_atual"' in source
-          assert 'key="tipo_ambiente_atual"' in source
+          assert 'key="tipo_ambiente_atual"' not in source
+          assert 'def tipo_ambiente' not in source
+          assert 'data-type-label' not in source
           assert 'ss-empty--search' in source
           assert 'ss-copy-feedback' in source
           config=Path('.streamlit/config.toml').read_text(encoding='utf-8')
@@ -164,9 +163,10 @@ jobs:
           assert 'primaryColor' in config
           javascript=Path('assets/interacoes.js').read_text(encoding='utf-8')
           assert 'localStorage.setItem' in javascript and 'sessionStorage.getItem' in javascript
+          assert 'dataset.typeLabel' not in javascript
           assert "showCopyFeedback(control)" in javascript
           assert 'ss-card--favorite' in javascript
-          print('Ordenação, ambientes, persistência e temas: OK')
+          print('Filtros, ordenação, persistência e cores: OK')
           PY
       - name: Verificar acabamento e responsividade
         run: |
@@ -175,9 +175,9 @@ jobs:
           source=Path("main.py").read_text(encoding="utf-8")
           style=Path("assets/painel.css").read_text(encoding="utf-8")
           assert '"Ordenar por", ["Município", "Entidade", "Categoria"]' in source
-          assert '"Tipo de ambiente", ["Todos", "Municipais", "Internos", "Treinamento"]' in source
+          assert '"Tipo de ambiente"' not in source
           assert 'key="ordenacao_atual", label_visibility="visible"' in source
-          assert 'key="tipo_ambiente_atual", label_visibility="visible"' in source
+          assert 'key="tipo_ambiente_atual"' not in source
           assert '.ss-title' in style and 'line-height:1.28' in style
           assert 'padding:5px 0 2px!important' in style
           assert '.ss-fav[aria-pressed="true"]' in style
