@@ -161,7 +161,7 @@ def ordem_busca(entidade, termo):
         prioridade = 2
     else:
         prioridade = 3
-    return (prioridade, nome, municipio)
+    return (prioridade, municipio, nome)
 
 
 def filtrar(itens, termo="", categoria="Todas"):
@@ -211,7 +211,6 @@ def criar_card(entidade, termo=""):
     # Oculta a segunda linha quando o município já aparece no nome completo.
     cidade_duplicada = normalizar(entidade["municipio"]) in normalizar(entidade["nome"])
     cat = escape(ROTULOS_CATEGORIA.get(entidade["categoria"], entidade["categoria"]), quote=True)
-    classificacao = bool(entidade.get("conferencia"))
     chave = escape(id_entidade(entidade), quote=True)
     url = entidade["url"]
     if url_valida(url):
@@ -239,7 +238,6 @@ def criar_card(entidade, termo=""):
         + f'aria-pressed="false" aria-label="Favoritar {nome}" title="Favoritar">☆</button></div>'
         + f'<h3 class="ss-card-title">{nome_destacado}</h3>'
         + ('' if cidade_duplicada else f'<p class="ss-card-city">{cidade_destacada}</p>')
-        + ('<p class="ss-review">Classificação a conferir</p>' if classificacao else '')
         + f'<div class="ss-grow"></div><div class="ss-actions">{acoes}</div></article>'
     )
 
@@ -272,7 +270,7 @@ def renderizar_lista(lista, agrupar=False, termo=""):
     )
     partes.append(
         '<nav class="ss-recent" aria-label="Sistemas abertos recentemente">'
-        '<div class="ss-recent-label">Abertos recentemente nesta aba</div>'
+        '<div class="ss-recent-label">Recentes</div>'
         '<div class="ss-recent-links"></div></nav>'
     )
     if agrupar:
@@ -377,11 +375,17 @@ def painel_pesquisa():
             width="content",
             wrap=True,
         )
-    agrupar_col, limpar_col = st.columns([3, 1], gap="small", vertical_alignment="center")
-    with agrupar_col:
+    with st.container(
+        key="controles_navegacao",
+        horizontal=True,
+        horizontal_alignment="left",
+        vertical_alignment="center",
+        gap="small",
+        wrap=True,
+    ):
         agrupar = st.toggle("Agrupar por município", value=False, key="agrupar")
-    with limpar_col:
-        st.button("Limpar filtros", icon=":material/refresh:", key="limpar", on_click=limpar_filtros, use_container_width=True)
+        st.button("Limpar filtros", icon=":material/refresh:", key="limpar",
+                  on_click=limpar_filtros, width="content")
     lista = filtrar(registros, pesquisa, categoria or "Todas")
     st.html(
         '<div class="ss-section-head"><h2>Entidades e ambientes</h2></div>'
@@ -399,7 +403,7 @@ painel_pesquisa()
 # 8. CONFERÊNCIA CADASTRAL
 # ==================================================
 with st.expander(f"Conferência cadastral · {pendentes} registros sem URL / {len(ACESSOS_ADICIONAIS)} acessos adicionais", expanded=False):
-    st.caption("Todos os links recebidos estão disponíveis nos cards. A classificação de acessos adicionais foi sugerida a partir do endereço e pode ser corrigida em veiculos_data.py.")
+    st.caption("Todos os links permanecem acessíveis nos cards. Os acessos adicionais têm a identificação 'Classificação a conferir' apenas nesta seção administrativa, até a confirmação em veiculos_data.py.")
     st.markdown("**Registros sem endereço**")
     for e in registros:
         if not url_valida(e["url"]):

@@ -7,13 +7,13 @@ Central de navegação do **Grupo S&S Informática**, desenvolvida em Python e S
 - Pesquisa por nome, município ou categoria, ignorando maiúsculas e acentos, com atualização após 250 ms sem digitar.
 - Pesquisa e filtros isolados em um `st.fragment`, mantendo o cabeçalho sem reconstrução desnecessária.
 - Filtros de **Prefeituras, Câmaras, Consórcios, Institutos, SAAEs e Ambientes especiais**, centralizados por um contêiner horizontal nativo do Streamlit, com quantidades discretas e quebra de linhas em telas menores.
-- Ordenação priorizando correspondências exatas, seguidas de prefixos e correspondências parciais.
+- Ordenação alfabética por município, ignorando acentos, e depois por entidade; a pesquisa preserva a priorização das melhores correspondências.
 - Visualização individual ou **agrupada por município** em grade fluida: grupos com 1 ou 2 acessos dividem a mesma linha com outros municípios, preservando os cards lado a lado e a ordem alfabética. Layout adaptável a celulares e favoritos, mantendo o botão para limpar os filtros.
-- Cards mais compactos (cinco colunas em telas largas), com município destacado na pesquisa e sem repetir a cidade quando ela já está no nome. Os botões de abrir, copiar e favoritar foram preservados.
-- **Favoritos** e **abertos recentemente** restritos à aba do navegador. Utilizam `sessionStorage`, sem banco de dados nem compartilhamento entre usuários. Ao encerrar a aba, os dados poderão ser descartados pelo navegador.
+- Cards compactos (cinco colunas em telas largas), com município destacado na pesquisa e sem repetir a cidade no nome; a classificação provisória aparece apenas na Conferência cadastral.
+- **Favoritos** e **acessos recentes** em faixa horizontal compacta, restritos à aba do navegador por `sessionStorage`, sem banco de dados ou compartilhamento.
 - Atalho **Ctrl+K** (ou **Cmd+K**, onde o navegador permitir) para focar a pesquisa.
 - Botão **Voltar ao topo** após rolagem e transições curtas nos filtros e resultados, respeitando a preferência por movimento reduzido.
-- Tema corporativo nas aparências clara e escura, com contraste e layout responsivo.
+- Tema claro/escuro com marca mais legível no escuro, filtros ativos verde-petróleo, controles próximos e espaçamento vertical reduzido.
 - Seção de conferência dos 7 registros sem link e das classificações sugeridas para os 26 acessos adicionais; os endereços são sempre pesquisáveis e abertos em nova aba.
 
 ## Quantidades iniciais (novembro de 2026)

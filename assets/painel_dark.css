@@ -7,6 +7,8 @@
  --ss-shadow:0 4px 18px rgba(0,0,0,.15);
  --ss-match-bg:#286564;--ss-match-text:#efffff;
 }
+/* Mais contraste na marca transparente, sem aplicar fundo branco. */
+[data-testid="stImage"] img {filter:brightness(1.45) saturate(1.18);background:transparent!important;}
 .ss-link {background:#087c80;color:#fff!important;}
 
 .ss-link:hover {background:#06686c;}

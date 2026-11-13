@@ -80,6 +80,38 @@ jobs:
           assert "if(action==='back-top')" in js
           print('Pesquisa e navegação: OK')
           PY
+      - name: Verificar ordenação e ajustes de interface
+        run: |
+          python - <<'PY'
+          import ast,unicodedata
+          from urllib.parse import urlparse
+          from pathlib import Path
+          code=Path('main.py').read_text(encoding='utf-8')
+          tree=ast.parse(code)
+          funcs=[n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name in ('normalizar','ordem_busca','filtrar')]
+          assert len(funcs)==3
+          ctx={'unicodedata':unicodedata,'urlparse':urlparse}
+          exec(compile(ast.Module(body=funcs,type_ignores=[]),'test','exec'),ctx)
+          items=[
+              dict(nome='Câmara de Caucaia',municipio='Caucaia',categoria='Câmaras',url=''),
+              dict(nome='Prefeitura de Acaraú',municipio='Acaraú',categoria='Prefeituras',url=''),
+              dict(nome='Câmara de Acaraú',municipio='Acaraú',categoria='Câmaras',url=''),
+              dict(nome='Prefeitura de Abaiara',municipio='Abaiara',categoria='Prefeituras',url='')]
+          order=[x['nome'] for x in ctx['filtrar'](items)]
+          assert order==['Prefeitura de Abaiara','Câmara de Acaraú','Prefeitura de Acaraú','Câmara de Caucaia'],order
+          assert ctx['filtrar'](items,'Caucaia')[0]['municipio']=='Caucaia'
+          card=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='criar_card')
+          assert 'Classificação a conferir' not in ast.get_source_segment(code,card)
+          assert "'Classificação a conferir'" in code
+          style=Path('assets/painel.css').read_text(encoding='utf-8')
+          dark=Path('assets/painel_dark.css').read_text(encoding='utf-8')
+          javascript=Path('assets/interacoes.js').read_text(encoding='utf-8')
+          assert 'stBaseButton-pillsActive' in style
+          assert 'st-key-controles_navegacao' in style
+          assert 'brightness(1.45)' in dark
+          assert "items.length ? 'flex':'none'" in javascript
+          print('Ordenação e apresentação: OK')
+          PY
       - name: Consistência cadastral
         run: |
           python - <<'PY'

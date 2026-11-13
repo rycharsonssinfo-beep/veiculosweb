@@ -74,7 +74,7 @@
     const bar = root.querySelector('.ss-recent');
     const container = root.querySelector('.ss-recent-links');
     container.replaceChildren();
-    bar.style.display = items.length ? 'block':'none';
+    bar.style.display = items.length ? 'flex':'none';
     items.forEach(item => {
       if (!item.url || !item.url.startsWith('https://ssveiculos.ssinformatica.net/')) return;
       const link = document.createElement('a');
